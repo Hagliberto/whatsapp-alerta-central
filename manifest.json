@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "WhatsApp Alerta Central",
-  "version": "1.2.13",
+  "version": "1.2.14",
   "description": "Toast profissional de 10 segundos para qualquer estado não lido no WhatsApp Web, com leitura refinada por acessibilidade, badges e arquivadas.",
   "permissions": [
     "storage",

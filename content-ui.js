@@ -5,6 +5,8 @@
   let activeHost = null;
   let closeTimer = null;
   let audioCtx = null;
+  let audioReady = false;
+  let pendingSound = false;
 
   function escapeHtml(value = "") {
     return String(value).replace(/[&<>'"]/g, ch => ({
@@ -47,9 +49,43 @@
     return "Nova mensagem";
   }
 
-  function playSound() {
+  function unlockAudio() {
     try {
-      audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+      const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextCtor) return;
+      audioCtx ||= new AudioContextCtor();
+
+      if (audioCtx.state === "running") {
+        audioReady = true;
+        if (pendingSound) {
+          pendingSound = false;
+          playSound();
+        }
+        return;
+      }
+
+      audioCtx.resume().then(() => {
+        audioReady = audioCtx?.state === "running";
+        if (audioReady && pendingSound) {
+          pendingSound = false;
+          playSound();
+        }
+      }).catch(() => {});
+    } catch (_) {}
+  }
+
+  // Chrome only allows Web Audio after a user gesture on the page.
+  for (const eventName of ["pointerdown", "keydown", "touchstart"]) {
+    window.addEventListener(eventName, unlockAudio, { capture: true, passive: true });
+  }
+
+  function playSound() {
+    if (!audioCtx || !audioReady || audioCtx.state !== "running") {
+      pendingSound = true;
+      return;
+    }
+
+    try {
       const now = audioCtx.currentTime;
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();

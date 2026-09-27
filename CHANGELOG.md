@@ -1,3 +1,9 @@
+## 1.2.14 — 2026-09-27
+
+- Corrige o bloqueio de áudio do Chrome: o `AudioContext` agora só é criado ou retomado após interação do usuário com a página.
+- Se o alerta sonoro chegar antes da primeira interação, ele fica pendente e toca após o primeiro clique, toque ou tecla.
+- Atualiza o manual para explicar esse comportamento.
+
 ## 1.2.13 — 2026-09-27
 
 ### Toast profissional e limpeza de textos técnicos

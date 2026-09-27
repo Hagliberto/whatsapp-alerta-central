@@ -155,7 +155,7 @@ Ativa ou desativa a observação do contador da seção **Arquivadas**.
 
 ### 8.3. Som
 
-Define se o toast deve reproduzir um sinal sonoro.
+Define se o toast deve reproduzir um sinal sonoro. O Chrome libera o áudio após uma interação com a página (clique, toque ou tecla). Se um alerta chegar antes dessa interação, o som fica aguardando e toca quando você interagir com a página.
 
 ### 8.4. Mostrar prévia
 
