@@ -1,143 +1,149 @@
-## 1.2.14 — 2026-09-27
+## 1.2.15 — 2026-09-27
 
-- Corrige o bloqueio de áudio do Chrome: o `AudioContext` agora só é criado ou retomado após interação do usuário com a página.
-- Se o alerta sonoro chegar antes da primeira interação, ele fica pendente e toca após o primeiro clique, toque ou tecla.
+- Corrige a organização do pacote de release: o ZIP completo é publicado como anexo da GitHub Release e não é incluído na branch main.
+- Remove da branch o ZIP da v1.2.14, quando ainda estiver rastreado, preservando o arquivo local e o anexo da release existente.
+- Não altera o comportamento da extensão.
+
+## 1.2.14 â€” 2026-09-27
+
+- Corrige o bloqueio de Ã¡udio do Chrome: o `AudioContext` agora sÃ³ Ã© criado ou retomado apÃ³s interaÃ§Ã£o do usuÃ¡rio com a pÃ¡gina.
+- Se o alerta sonoro chegar antes da primeira interaÃ§Ã£o, ele fica pendente e toca apÃ³s o primeiro clique, toque ou tecla.
 - Atualiza o manual para explicar esse comportamento.
 
-## 1.2.13 — 2026-09-27
+## 1.2.13 â€” 2026-09-27
 
-### Toast profissional e limpeza de textos técnicos
+### Toast profissional e limpeza de textos tÃ©cnicos
 
-- impede que identificadores internos do WhatsApp, como `ic-archive`, apareçam como nome da conversa;
-- prioriza títulos humanos e ignora labels técnicos de ícones/componentes;
-- traduz e padroniza todo o texto exibido pelo toast em português;
-- novo layout mais robusto, com cabeçalho, hierarquia visual, chips de contexto e rodapé de ação;
-- diferencia visualmente `Nova mensagem`, `Marcada como não lida`, `Pendente ao abrir` e `Conversa arquivada`;
-- quando a prévia não é confiável, usa uma mensagem descritiva em português em vez de texto técnico;
-- mantém duração de 10 segundos e todas as regras de detecção da v1.2.12.
+- impede que identificadores internos do WhatsApp, como `ic-archive`, apareÃ§am como nome da conversa;
+- prioriza tÃ­tulos humanos e ignora labels tÃ©cnicos de Ã­cones/componentes;
+- traduz e padroniza todo o texto exibido pelo toast em portuguÃªs;
+- novo layout mais robusto, com cabeÃ§alho, hierarquia visual, chips de contexto e rodapÃ© de aÃ§Ã£o;
+- diferencia visualmente `Nova mensagem`, `Marcada como nÃ£o lida`, `Pendente ao abrir` e `Conversa arquivada`;
+- quando a prÃ©via nÃ£o Ã© confiÃ¡vel, usa uma mensagem descritiva em portuguÃªs em vez de texto tÃ©cnico;
+- mantÃ©m duraÃ§Ã£o de 10 segundos e todas as regras de detecÃ§Ã£o da v1.2.12.
 
 # Changelog
 
-## 1.2.12 — 2026-09-27
+## 1.2.12 â€” 2026-09-27
 
-- Refina a detecção de não lidos usando primeiro os nomes acessíveis observados no WhatsApp Web, como `Não lidas` e `1 mensagem não lida`.
-- Separa explicitamente três fontes de estado não lido: acessibilidade, badge numérico e ponto verde.
-- Badges numéricos só são aceitos quando são compactos e ficam na região direita da linha da conversa.
-- Horários (`12:15`, `2:40 AM`), datas e outros números de conteúdo são rejeitados antes de qualquer interpretação como contador.
-- O contador de **Arquivadas** passa a ser lido somente de um badge compacto alinhado horizontalmente ao rótulo `Arquivadas`, evitando varredura numérica ampla do container.
-- Quando a quantidade não é confiável (por exemplo, somente ponto verde), a conversa continua sendo considerada não lida, mas sem inventar uma contagem.
-- Mantidas as cinco regras da v1.2.11: novas mensagens, marcações manuais, arquivadas, marcações manuais em arquivadas e varredura ao abrir/recarregar geram toast.
+- Refina a detecÃ§Ã£o de nÃ£o lidos usando primeiro os nomes acessÃ­veis observados no WhatsApp Web, como `NÃ£o lidas` e `1 mensagem nÃ£o lida`.
+- Separa explicitamente trÃªs fontes de estado nÃ£o lido: acessibilidade, badge numÃ©rico e ponto verde.
+- Badges numÃ©ricos sÃ³ sÃ£o aceitos quando sÃ£o compactos e ficam na regiÃ£o direita da linha da conversa.
+- HorÃ¡rios (`12:15`, `2:40 AM`), datas e outros nÃºmeros de conteÃºdo sÃ£o rejeitados antes de qualquer interpretaÃ§Ã£o como contador.
+- O contador de **Arquivadas** passa a ser lido somente de um badge compacto alinhado horizontalmente ao rÃ³tulo `Arquivadas`, evitando varredura numÃ©rica ampla do container.
+- Quando a quantidade nÃ£o Ã© confiÃ¡vel (por exemplo, somente ponto verde), a conversa continua sendo considerada nÃ£o lida, mas sem inventar uma contagem.
+- Mantidas as cinco regras da v1.2.11: novas mensagens, marcaÃ§Ãµes manuais, arquivadas, marcaÃ§Ãµes manuais em arquivadas e varredura ao abrir/recarregar geram toast.
 
-## 1.2.11 — 2026-09-27
+## 1.2.11 â€” 2026-09-27
 
-- Toda conversa em estado **não lido** passa a ser elegível para toast, independentemente da origem do estado.
+- Toda conversa em estado **nÃ£o lido** passa a ser elegÃ­vel para toast, independentemente da origem do estado.
 - Mensagem realmente recebida agora gera toast.
-- Conversa marcada manualmente como não lida gera toast.
+- Conversa marcada manualmente como nÃ£o lida gera toast.
 - Mensagem nova em conversa arquivada gera toast.
-- Conversa arquivada marcada manualmente como não lida gera toast.
-- Ao abrir/recarregar o WhatsApp Web, as conversas não lidas já existentes também geram toast.
-- A varredura inicial de conversas normais deixa de ignorar pendências anteriores ao carregamento.
-- A varredura inicial de Arquivadas tenta gerar toast por conversa; quando a lista não pode ser materializada, mantém fallback por resumo.
-- A deduplicação de inicialização inclui um token da sessão, permitindo que uma conversa ainda não lida volte a avisar após recarregar a página sem repetir continuamente na mesma sessão.
-- Adicionada detecção semântica de `Marcar como lida / Mark as read` e fallback visual para o ponto verde de conversa não lida.
-- Quando a pasta Arquivadas está aberta, as linhas são tratadas explicitamente como arquivadas, inclusive para marcações manuais como não lidas.
+- Conversa arquivada marcada manualmente como nÃ£o lida gera toast.
+- Ao abrir/recarregar o WhatsApp Web, as conversas nÃ£o lidas jÃ¡ existentes tambÃ©m geram toast.
+- A varredura inicial de conversas normais deixa de ignorar pendÃªncias anteriores ao carregamento.
+- A varredura inicial de Arquivadas tenta gerar toast por conversa; quando a lista nÃ£o pode ser materializada, mantÃ©m fallback por resumo.
+- A deduplicaÃ§Ã£o de inicializaÃ§Ã£o inclui um token da sessÃ£o, permitindo que uma conversa ainda nÃ£o lida volte a avisar apÃ³s recarregar a pÃ¡gina sem repetir continuamente na mesma sessÃ£o.
+- Adicionada detecÃ§Ã£o semÃ¢ntica de `Marcar como lida / Mark as read` e fallback visual para o ponto verde de conversa nÃ£o lida.
+- Quando a pasta Arquivadas estÃ¡ aberta, as linhas sÃ£o tratadas explicitamente como arquivadas, inclusive para marcaÃ§Ãµes manuais como nÃ£o lidas.
 
-## 1.2.10 — 2026-09-27
+## 1.2.10 â€” 2026-09-27
 
-- Corrige falso contador como `9411 mensagens não lidas` em conversas arquivadas.
-- O parser não extrai mais números genéricos próximos ao item Arquivadas.
-- Horários como `9:41` são ignorados na leitura de badges.
-- Contadores só são aceitos quando são badges numéricos compactos ou estão semanticamente associados a `não lida/unread`.
-- O toast de conversa arquivada deixa de exibir contagem de mensagens quando o valor não é necessário, evitando informação enganosa.
+- Corrige falso contador como `9411 mensagens nÃ£o lidas` em conversas arquivadas.
+- O parser nÃ£o extrai mais nÃºmeros genÃ©ricos prÃ³ximos ao item Arquivadas.
+- HorÃ¡rios como `9:41` sÃ£o ignorados na leitura de badges.
+- Contadores sÃ³ sÃ£o aceitos quando sÃ£o badges numÃ©ricos compactos ou estÃ£o semanticamente associados a `nÃ£o lida/unread`.
+- O toast de conversa arquivada deixa de exibir contagem de mensagens quando o valor nÃ£o Ã© necessÃ¡rio, evitando informaÃ§Ã£o enganosa.
 
 ## 1.2.9
-- Corrige a inicialização das conversas arquivadas já não lidas.
-- A detecção inicial de arquivadas agora possui estado próprio e não depende do primeiro `scan()` geral.
-- Aguarda até 20 segundos pela montagem progressiva da interface do WhatsApp Web.
-- Se o contador de Arquivadas não estiver acessível, abre a pasta silenciosamente, contabiliza conversas não lidas e retorna à tela anterior.
-- Evita perder o toast inicial quando `archiveUnread` ainda é `null` nos primeiros segundos de carregamento.
+- Corrige a inicializaÃ§Ã£o das conversas arquivadas jÃ¡ nÃ£o lidas.
+- A detecÃ§Ã£o inicial de arquivadas agora possui estado prÃ³prio e nÃ£o depende do primeiro `scan()` geral.
+- Aguarda atÃ© 20 segundos pela montagem progressiva da interface do WhatsApp Web.
+- Se o contador de Arquivadas nÃ£o estiver acessÃ­vel, abre a pasta silenciosamente, contabiliza conversas nÃ£o lidas e retorna Ã  tela anterior.
+- Evita perder o toast inicial quando `archiveUnread` ainda Ã© `null` nos primeiros segundos de carregamento.
 
 ## 1.2.8 - 2026-09-27
-- Conversas arquivadas que já estavam não lidas agora geram um toast-resumo ao abrir ou recarregar o WhatsApp Web.
-- O primeiro scan não ignora mais silenciosamente o contador inicial de Arquivadas.
-- O alerta inicial recebe um token por sessão para aparecer uma vez por carregamento, sem repetir durante a mesma sessão.
+- Conversas arquivadas que jÃ¡ estavam nÃ£o lidas agora geram um toast-resumo ao abrir ou recarregar o WhatsApp Web.
+- O primeiro scan nÃ£o ignora mais silenciosamente o contador inicial de Arquivadas.
+- O alerta inicial recebe um token por sessÃ£o para aparecer uma vez por carregamento, sem repetir durante a mesma sessÃ£o.
 
 # CHANGELOG
 
 ## 1.2.7
-- Corrigida a detecção de mensagens arquivadas enquanto a aba do WhatsApp Web está em segundo plano.
-- Adicionada verificação silenciosa da pasta **Arquivadas**: a extensão abre a pasta somente quando o WhatsApp está oculto, lê as conversas não lidas e retorna automaticamente à tela anterior.
-- A verificação identifica conversa, prévia, horário e aumento de não lidas quando esses dados estão disponíveis.
-- Adicionado `chrome.alarms` como redundância de 30 segundos para contornar o throttling de timers em abas ocultas.
-- Mantido o polling local de 5 segundos para resposta rápida quando o Chrome ainda permite execução normal em segundo plano.
-- Alertas genéricos pelo contador de arquivadas foram limitados à aba visível para evitar duplicidade com a leitura silenciosa da pasta.
+- Corrigida a detecÃ§Ã£o de mensagens arquivadas enquanto a aba do WhatsApp Web estÃ¡ em segundo plano.
+- Adicionada verificaÃ§Ã£o silenciosa da pasta **Arquivadas**: a extensÃ£o abre a pasta somente quando o WhatsApp estÃ¡ oculto, lÃª as conversas nÃ£o lidas e retorna automaticamente Ã  tela anterior.
+- A verificaÃ§Ã£o identifica conversa, prÃ©via, horÃ¡rio e aumento de nÃ£o lidas quando esses dados estÃ£o disponÃ­veis.
+- Adicionado `chrome.alarms` como redundÃ¢ncia de 30 segundos para contornar o throttling de timers em abas ocultas.
+- Mantido o polling local de 5 segundos para resposta rÃ¡pida quando o Chrome ainda permite execuÃ§Ã£o normal em segundo plano.
+- Alertas genÃ©ricos pelo contador de arquivadas foram limitados Ã  aba visÃ­vel para evitar duplicidade com a leitura silenciosa da pasta.
 
 ## 1.2.6
-- Corrigida a detecção do contador de conversas arquivadas no layout atual do WhatsApp Web.
-- O detector agora procura o contador em atributos acessíveis, elementos irmãos e alinhamento visual do item “Arquivadas”.
-- Corrigida a deduplicação de alertas arquivados para não bloquear eventos futuros.
-- Adicionado fallback pelo contador global de não lidas quando não há mudança detectável em conversa normal.
+- Corrigida a detecÃ§Ã£o do contador de conversas arquivadas no layout atual do WhatsApp Web.
+- O detector agora procura o contador em atributos acessÃ­veis, elementos irmÃ£os e alinhamento visual do item â€œArquivadasâ€.
+- Corrigida a deduplicaÃ§Ã£o de alertas arquivados para nÃ£o bloquear eventos futuros.
+- Adicionado fallback pelo contador global de nÃ£o lidas quando nÃ£o hÃ¡ mudanÃ§a detectÃ¡vel em conversa normal.
 
 # Changelog
 
 ## 1.2.5
 - Corrigido o toast em abas diferentes do WhatsApp Web.
-- O background agora injeta `content-ui.css` e `content-ui.js` sob demanda na aba ativa quando ela ainda não possui o módulo visual.
-- Adicionada a permissão `scripting` necessária para a injeção segura via Manifest V3.
-- O envio do toast agora tenta novamente após a injeção, evitando falhas silenciosas em abas que já estavam abertas antes de instalar/recarregar a extensão.
+- O background agora injeta `content-ui.css` e `content-ui.js` sob demanda na aba ativa quando ela ainda nÃ£o possui o mÃ³dulo visual.
+- Adicionada a permissÃ£o `scripting` necessÃ¡ria para a injeÃ§Ã£o segura via Manifest V3.
+- O envio do toast agora tenta novamente apÃ³s a injeÃ§Ã£o, evitando falhas silenciosas em abas que jÃ¡ estavam abertas antes de instalar/recarregar a extensÃ£o.
 
 ## 1.2.4
-- Corrige `TypeError: Cannot read properties of null (reading 'type')` na tela de configurações.
-- `options.js` agora ignora com segurança configurações sem elemento editável correspondente no `options.html`.
-- A duração do toast continua fixa em 10 segundos e é persistida explicitamente, sem depender de um campo inexistente.
-- Removida a dependência do acesso implícito ao elemento global `saved`; o elemento agora é obtido com `getElementById`.
+- Corrige `TypeError: Cannot read properties of null (reading 'type')` na tela de configuraÃ§Ãµes.
+- `options.js` agora ignora com seguranÃ§a configuraÃ§Ãµes sem elemento editÃ¡vel correspondente no `options.html`.
+- A duraÃ§Ã£o do toast continua fixa em 10 segundos e Ã© persistida explicitamente, sem depender de um campo inexistente.
+- Removida a dependÃªncia do acesso implÃ­cito ao elemento global `saved`; o elemento agora Ã© obtido com `getElementById`.
 - Mantidas todas as funcionalidades da v1.2.3.
 
 ## 1.2.3
-- Proteção contra `Extension context invalidated` após recarregar/atualizar a extensão.
+- ProteÃ§Ã£o contra `Extension context invalidated` apÃ³s recarregar/atualizar a extensÃ£o.
 - Chamadas de `chrome.runtime.sendMessage` dos content scripts agora validam o contexto e consomem `runtime.lastError`.
-- Mantidos TOAST de 10 segundos e deduplicação de mensagens.
+- Mantidos TOAST de 10 segundos e deduplicaÃ§Ã£o de mensagens.
 
 ## 1.2.2
 - Corrige erro do popup causado pelo conflito entre o id `status` e `window.status`.
 - Passa a buscar explicitamente os elementos do popup com `getElementById`.
-- Ignora mensagens nulas ou inválidas nos listeners da extensão.
-- Mantém TOAST de 10 segundos e deduplicação da mesma mensagem.
+- Ignora mensagens nulas ou invÃ¡lidas nos listeners da extensÃ£o.
+- MantÃ©m TOAST de 10 segundos e deduplicaÃ§Ã£o da mesma mensagem.
 
 ## 1.2.1
-- A mesma mensagem não é mais notificada novamente.
-- Deduplicação em duas camadas: aba do WhatsApp Web + background da extensão.
-- Impressão digital da mensagem considera conversa, prévia e horário exibido.
-- Histórico recente de mensagens notificadas é preservado por até 24 horas no armazenamento local da extensão.
-- Mantido TOAST de 10 segundos e fallback nativo do Chrome desativado por padrão.
+- A mesma mensagem nÃ£o Ã© mais notificada novamente.
+- DeduplicaÃ§Ã£o em duas camadas: aba do WhatsApp Web + background da extensÃ£o.
+- ImpressÃ£o digital da mensagem considera conversa, prÃ©via e horÃ¡rio exibido.
+- HistÃ³rico recente de mensagens notificadas Ã© preservado por atÃ© 24 horas no armazenamento local da extensÃ£o.
+- Mantido TOAST de 10 segundos e fallback nativo do Chrome desativado por padrÃ£o.
 
 ## 1.2.0
 
 - alerta alterado para toast no canto superior direito;
-- duração fixa de 10 segundos;
-- exibição de conversa/remetente, prévia, horário e tipo da mensagem;
-- indicador de mensagens não lidas quando disponível;
-- deduplicação reforçada por 10 segundos para evitar alertas repetidos;
-- fluxo interno padronizado em português.
+- duraÃ§Ã£o fixa de 10 segundos;
+- exibiÃ§Ã£o de conversa/remetente, prÃ©via, horÃ¡rio e tipo da mensagem;
+- indicador de mensagens nÃ£o lidas quando disponÃ­vel;
+- deduplicaÃ§Ã£o reforÃ§ada por 10 segundos para evitar alertas repetidos;
+- fluxo interno padronizado em portuguÃªs.
 
 
-Todas as alterações relevantes do projeto devem ser registradas neste arquivo.
+Todas as alteraÃ§Ãµes relevantes do projeto devem ser registradas neste arquivo.
 
-## 1.1.0 — 2026-09-25
+## 1.1.0 â€” 2026-09-25
 
-### Documentação e profissionalização
+### DocumentaÃ§Ã£o e profissionalizaÃ§Ã£o
 
-- adicionado `AGENTS.md` com regras completas de arquitetura e manutenção;
-- adicionado `MANUAL_USUARIO.md` com instalação, uso, permissões, testes e solução de problemas;
+- adicionado `AGENTS.md` com regras completas de arquitetura e manutenÃ§Ã£o;
+- adicionado `MANUAL_USUARIO.md` com instalaÃ§Ã£o, uso, permissÃµes, testes e soluÃ§Ã£o de problemas;
 - adicionado `README.md` profissional;
 - adicionado `PRIVACIDADE.md`;
-- documentada a estratégia para conversas arquivadas;
-- documentadas permissões e limitações do Chrome/WhatsApp Web;
-- definido checklist obrigatório de testes e entrega;
-- definido padrão de versionamento semântico;
-- pacote preparado para evolução futura sem acumular versões antigas no ZIP.
+- documentada a estratÃ©gia para conversas arquivadas;
+- documentadas permissÃµes e limitaÃ§Ãµes do Chrome/WhatsApp Web;
+- definido checklist obrigatÃ³rio de testes e entrega;
+- definido padrÃ£o de versionamento semÃ¢ntico;
+- pacote preparado para evoluÃ§Ã£o futura sem acumular versÃµes antigas no ZIP.
 
-## 1.0.0 — 2026-09-25
+## 1.0.0 â€” 2026-09-25
 
 ### Inicial
 
@@ -145,8 +151,8 @@ Todas as alterações relevantes do projeto devem ser registradas neste arquivo.
 - toast na aba ativa;
 - alerta de conversas normais;
 - monitoramento do contador de arquivadas;
-- prévia opcional;
+- prÃ©via opcional;
 - som opcional;
-- botão para abrir WhatsApp;
-- notificação de sistema como fallback;
-- painel de configurações.
+- botÃ£o para abrir WhatsApp;
+- notificaÃ§Ã£o de sistema como fallback;
+- painel de configuraÃ§Ãµes.

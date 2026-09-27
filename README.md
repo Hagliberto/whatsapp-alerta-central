@@ -2,7 +2,7 @@
 
 Extensão para **Google Chrome / Chromium (Manifest V3)** que monitora estados não lidos no WhatsApp Web e exibe um toast profissional na aba web ativa do navegador.
 
-> **Versão atual:** `1.2.14`
+> **Versão atual:** `$11.2.15`
 
 ## Visão geral
 
