@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>WhatsApp Alerta Central</title>
+  <link rel="stylesheet" href="ui.css">
+</head>
+<body class="popup-page">
+  <main class="popup-card">
+    <div class="brand-row">
+      <div class="brand-icon">💬</div>
+      <div>
+        <h1>WhatsApp Alerta</h1>
+        <p>Toast de novas mensagens</p>
+      </div>
+    </div>
+
+    <div id="status" class="status">Verificando WhatsApp Web…</div>
+
+    <label class="switch-row">
+      <span><strong>Ativar alertas</strong><small>Exibir toast</small></span>
+      <input id="enabled" type="checkbox"><i></i>
+    </label>
+
+    <label class="switch-row">
+      <span><strong>Conversas arquivadas</strong><small>Avisar pelo contador de não lidas</small></span>
+      <input id="archived" type="checkbox"><i></i>
+    </label>
+
+    <div class="actions">
+      <button id="openWa" class="primary">Abrir WhatsApp Web</button>
+      <button id="options" class="secondary">Configurações</button>
+    </div>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

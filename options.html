@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Configurações — WhatsApp Alerta Central</title>
+  <link rel="stylesheet" href="ui.css">
+</head>
+<body>
+  <main class="settings-shell">
+    <header class="settings-header">
+      <div class="brand-icon large">💬</div>
+      <div>
+        <h1>WhatsApp Alerta Central</h1>
+        <p>Configure como os avisos serão exibidos.</p>
+      </div>
+    </header>
+
+    <section class="panel">
+      <h2>Alertas</h2>
+      <label class="switch-row"><span><strong>Ativar extensão</strong><small>Monitora mensagens enquanto o WhatsApp Web estiver aberto.</small></span><input id="enabled" type="checkbox"><i></i></label>
+      <label class="switch-row"><span><strong>Avisar conversas arquivadas</strong><small>Detecta aumento no contador de não lidas da pasta Arquivadas.</small></span><input id="archived" type="checkbox"><i></i></label>
+      <label class="switch-row"><span><strong>Som</strong><small>Toca um sinal curto junto com o toast.</small></span><input id="sound" type="checkbox"><i></i></label>
+      <label class="switch-row"><span><strong>Mostrar prévia</strong><small>Exibe o trecho da mensagem quando estiver disponível.</small></span><input id="showPreview" type="checkbox"><i></i></label>
+      <label class="switch-row"><span><strong>Notificação do sistema como reserva</strong><small>Opcional. Usada somente quando a aba atual não aceita o toast, como páginas chrome://. Pode gerar uma notificação nativa separada.</small></span><input id="desktopFallback" type="checkbox"><i></i></label>
+
+      <div class="field-row">
+        <span><strong>Duração do toast</strong><small>O alerta permanece visível por 10 segundos.</small></span>
+        <div><b>10 s</b></div>
+      </div>
+    </section>
+
+    <section class="panel info">
+      <h2>Como funciona</h2>
+      <p>Deixe o <strong>WhatsApp Web aberto em alguma aba</strong>. A extensão observa a lista de conversas localmente e envia o alerta para a aba que estiver ativa.</p>
+      <p>Em conversas arquivadas, o WhatsApp não fornece a notificação comum; por isso a extensão observa o contador de não lidas da pasta <strong>Arquivadas</strong>.</p>
+    </section>
+
+    <div id="saved" class="saved">Configurações salvas</div>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

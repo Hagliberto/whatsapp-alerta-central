@@ -1,0 +1,12 @@
+{
+  "name": "whatsapp-alerta-central",
+  "version": "1.2.13",
+  "private": true,
+  "description": "Extensão Chrome Manifest V3 para alertas de estados não lidos do WhatsApp Web.",
+  "scripts": {
+    "validate": "node scripts/validate.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
