@@ -1,3 +1,25 @@
+## 1.3.1 — 2026-09-28
+
+- Corrige o monitoramento de conversas arquivadas para obedecer ao modo estritamente passivo definido pelo projeto.
+- Remove a abertura automática da pasta **Arquivadas** e qualquer clique sintético usado para entrar/sair dessa área.
+- O alarme de redundância em segundo plano agora apenas solicita uma nova leitura do DOM do WhatsApp Web.
+- O contador de Arquivadas pode continuar gerando alerta genérico quando aumenta, inclusive com a aba em segundo plano, desde que o WhatsApp exponha esse contador no DOM.
+- Quando o usuário abrir Arquivadas manualmente, a extensão continua podendo identificar as conversas não lidas visíveis.
+- Reduz o risco de interferência no estado interno/navegação do WhatsApp Web.
+
+## 1.3.0 — 2026-09-28
+
+- Adiciona intervalo configurável para a varredura periódica de novas mensagens (5 a 300 segundos).
+- Adiciona reaviso automático configurável para mensagens que continuam pendentes.
+- Adiciona configuração do tempo do botão **Adiar**.
+- O toast passa a oferecer **Adiar**, **Silenciar**, **Marcar como lida** e **Abrir**.
+- **Silenciar** interrompe os reavisos da pendência atual até chegar nova mensagem na mesma conversa.
+- **Marcar como lida** confirma a pendência somente na extensão e não altera o estado da conversa no WhatsApp.
+- Abrir a conversa pelo toast ou diretamente no WhatsApp Web encerra os reavisos daquela pendência.
+- O popup passa a informar a quantidade de pendências e pendências silenciadas.
+- O fallback de notificação do sistema oferece ações de **Adiar** e **Marcar como lida**.
+- Mantém processamento local e não adiciona novas permissões.
+
 ## 1.2.15 — 2026-09-27
 
 - Corrige a organização do pacote de release: o ZIP completo é publicado como anexo da GitHub Release e não é incluído na branch main.

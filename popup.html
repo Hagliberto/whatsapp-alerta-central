@@ -12,11 +12,12 @@
       <div class="brand-icon">💬</div>
       <div>
         <h1>WhatsApp Alerta</h1>
-        <p>Toast de novas mensagens</p>
+        <p>Mensagens e lembretes pendentes</p>
       </div>
     </div>
 
     <div id="status" class="status">Verificando WhatsApp Web…</div>
+    <div id="pending" class="status compact">Verificando pendências…</div>
 
     <label class="switch-row">
       <span><strong>Ativar alertas</strong><small>Exibir toast</small></span>
@@ -24,8 +25,13 @@
     </label>
 
     <label class="switch-row">
-      <span><strong>Conversas arquivadas</strong><small>Avisar pelo contador de não lidas</small></span>
+      <span><strong>Conversas arquivadas</strong><small>Avisar estados não lidos</small></span>
       <input id="archived" type="checkbox"><i></i>
+    </label>
+
+    <label class="switch-row">
+      <span><strong>Reavisar pendentes</strong><small>Repetir enquanto não forem abertos ou confirmados</small></span>
+      <input id="repeatReminders" type="checkbox"><i></i>
     </label>
 
     <div class="actions">

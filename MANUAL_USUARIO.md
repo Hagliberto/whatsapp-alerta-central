@@ -1,6 +1,6 @@
 # Manual do Usuário — WhatsApp Alerta Central
 
-**Versão:** 1.1.0  
+**Versão:** 1.3.1  
 **Plataforma:** Google Chrome / navegadores Chromium compatíveis  
 **Tipo:** Extensão local para WhatsApp Web
 
@@ -26,7 +26,10 @@ Toda a operação da extensão é realizada localmente no navegador.
 - Botão para abrir ou focar o WhatsApp Web.
 - Aviso para novas mensagens em conversas arquivadas.
 - Sinal sonoro opcional.
-- Tempo de permanência configurável.
+- Toast com permanência de 10 segundos.
+- Intervalo de verificação periódica configurável.
+- Reaviso de mensagens pendentes em intervalo configurável.
+- Ações para adiar, silenciar ou confirmar a leitura na extensão.
 - Notificação do sistema como alternativa em páginas onde o Chrome não permite sobreposição.
 - Preferências armazenadas localmente pelo Chrome.
 - Nenhum servidor externo da extensão.
@@ -165,9 +168,25 @@ Essa opção é útil para ambientes compartilhados ou telas visíveis para outr
 
 ### 8.5. Tempo do toast
 
-Define por quanto tempo o alerta permanece visível antes de desaparecer automaticamente.
+O alerta permanece visível por 10 segundos antes de desaparecer automaticamente. Fechar o toast no **×** não confirma leitura e, se os reavisos estiverem ativos, a pendência poderá aparecer novamente.
 
-### 8.6. Notificação de sistema
+### 8.6. Verificação e reavisos
+
+- **Verificar novas mensagens a cada:** define a frequência da varredura periódica, entre 5 e 300 segundos. Alterações do WhatsApp também são observadas em tempo real pelo detector da página.
+- **Reavisar mensagens pendentes:** quando habilitado, uma mensagem que não foi aberta nem confirmada volta a gerar alerta.
+- **Reavisar a cada:** define em minutos o intervalo dos lembretes.
+- **Adiar por:** define quantos minutos o botão **Adiar** posterga o próximo lembrete.
+
+No toast:
+
+- **Adiar:** posterga o próximo lembrete;
+- **Silenciar:** não repete a pendência atual até uma nova mensagem chegar nessa conversa;
+- **Marcar como lida:** encerra a pendência somente na extensão; não clica, não lê nem altera a conversa no WhatsApp;
+- **Abrir:** abre/foca a conversa e encerra os reavisos da pendência.
+
+Se a conversa for aberta manualmente no WhatsApp Web, a extensão também tenta encerrar os reavisos correspondentes.
+
+### 8.7. Notificação de sistema
 
 Pode ser utilizada como fallback quando a aba ativa não aceita a interface visual da extensão.
 
@@ -360,11 +379,11 @@ O toast global usa injeção sob demanda pelo service worker para aparecer na ab
 
 
 ## Detecção de arquivadas em segundo plano — v1.2.7
-Quando o WhatsApp Web está em outra aba, o aplicativo pode não atualizar o contador de **Arquivadas** no DOM principal. A extensão realiza uma leitura silenciosa periódica da pasta Arquivadas enquanto a aba está oculta e retorna automaticamente à tela anterior. Existe ainda um alarme de redundância do Manifest V3 para reduzir falhas causadas por throttling do Chrome.
+Quando o WhatsApp Web está em outra aba, o Chrome pode reduzir a frequência dos timers da página. A extensão usa um alarme de redundância do Manifest V3 para solicitar uma nova leitura **passiva** do DOM. Ela não abre a pasta Arquivadas, não muda de tela e não simula cliques. Se o WhatsApp não expuser detalhes suficientes fora da pasta Arquivadas, o alerta será genérico até que o próprio usuário abra essa área.
 
 
 ## Atualização 1.2.9
-Ao abrir ou recarregar o WhatsApp Web, se já existirem conversas arquivadas não lidas, a extensão exibe um toast-resumo imediatamente. Esse aviso inicial ocorre uma vez por carregamento da página e não depende de abrir manualmente a pasta Arquivadas.
+Ao abrir ou recarregar o WhatsApp Web, se o contador de Arquivadas já estiver exposto no DOM e indicar pendências, a extensão pode exibir um toast-resumo uma vez por carregamento. A extensão não abre Arquivadas automaticamente para descobrir detalhes.
 
 
 ## Contadores de arquivadas

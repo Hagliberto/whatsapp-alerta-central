@@ -13,17 +13,28 @@
     notifiedOrder: [],
     archiveFolderRows: new Map(),
     archiveFolderInitialized: false,
-    archivePollRunning: false,
-    lastArchivePollAt: 0,
     initialArchiveToastSent: false,
     initialArchiveProbeDone: false,
     initialArchiveProbeRunning: false,
     initialNormalScanDone: false,
+    periodicScanTimer: null,
+    checkIntervalSeconds: 8,
     sessionToken: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
   };
 
   const normalize = (s = "") => s.replace(/\s+/g, " ").trim();
   const lower = (s = "") => normalize(s).toLocaleLowerCase("pt-BR");
+
+  function reportConversationState(type, title) {
+    const safeTitle = normalize(title || "");
+    if (!safeTitle || /^(?:arquivadas|archived)$/i.test(safeTitle)) return;
+    try {
+      if (!globalThis.chrome?.runtime?.id) return;
+      chrome.runtime.sendMessage({ type, title: safeTitle }, () => {
+        void chrome.runtime.lastError;
+      });
+    } catch (_) {}
+  }
 
   function dedupe(key, ms = 3500) {
     const now = Date.now();
@@ -372,63 +383,11 @@
     return best || null;
   }
 
-  function findArchivedEntry() {
-    const selectors = [
-      '[data-testid*="archiv" i]',
-      '[aria-label*="arquiv" i]',
-      '[aria-label*="archiv" i]',
-      '[title*="arquiv" i]',
-      '[title*="archiv" i]'
-    ];
-
-    for (const selector of selectors) {
-      const nodes = [...document.querySelectorAll(selector)];
-      const hit = nodes.find(el => /arquivadas|archived/i.test(normalize(el.textContent || el.getAttribute("aria-label") || el.getAttribute("title") || "")));
-      if (hit) return hit.closest('[role="button"], button, [tabindex="0"]') || hit;
-    }
-
-    const textual = [...document.querySelectorAll('div, span, button')].find(el => {
-      const t = lower(el.textContent || "");
-      return t === "arquivadas" || t === "archived";
-    });
-    return textual ? (textual.closest('[role="button"], button, [tabindex="0"]') || textual) : null;
-  }
-
   function isArchivedFolderOpen() {
     const headerTexts = [...document.querySelectorAll('header, [role="banner"], h1, h2, div, span')]
       .slice(0, 1200)
       .map(el => lower(el.textContent || ""));
     return headerTexts.some(t => t === "arquivadas" || t === "archived");
-  }
-
-  function findBackButton() {
-    const selectors = [
-      '[aria-label="Voltar"]',
-      '[aria-label="Back"]',
-      '[title="Voltar"]',
-      '[title="Back"]',
-      '[data-testid*="back" i]'
-    ];
-    for (const selector of selectors) {
-      const el = document.querySelector(selector);
-      if (el) return el.closest('button, [role="button"], [tabindex="0"]') || el;
-    }
-    return null;
-  }
-
-  function wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  async function waitUntil(predicate, timeout = 2500, step = 100) {
-    const started = Date.now();
-    while (Date.now() - started < timeout) {
-      try {
-        if (predicate()) return true;
-      } catch (_) {}
-      await wait(step);
-    }
-    return false;
   }
 
   function scanArchivedFolderRows({ allowNotify }) {
@@ -446,6 +405,10 @@
       const key = rowKey(row, title);
       const prev = state.archiveFolderRows.get(key);
       next.set(key, { unread, preview, title, messageTime });
+
+      if (prev && prev.unread > 0 && unread === 0) {
+        reportConversationState("WHATSAPP_CHAT_READ", title);
+      }
 
       if (unread > 0) {
         unreadChats += 1;
@@ -494,104 +457,29 @@
     state.initialArchiveProbeRunning = true;
 
     try {
-      // O shell do WhatsApp é montado em etapas. Por até 20 s, aguardamos o
-      // item Arquivadas e tentamos ler seu contador sem alterar a interface.
+      // Monitoramento estritamente passivo: aguardamos a montagem progressiva
+      // do WhatsApp Web e lemos apenas o contador que já estiver exposto no DOM.
+      // A extensão nunca abre a pasta Arquivadas automaticamente.
       const deadline = Date.now() + 20000;
       while (Date.now() < deadline) {
-        const entry = findArchivedEntry();
         const count = findArchiveUnreadCount();
-
-        if (count !== null && count > 0) {
+        if (count !== null) {
           state.archiveUnread = count;
-          // Há pendência. Não finalizamos aqui: abrimos a pasta silenciosamente
-          // para gerar toast por conversa não lida quando possível.
+          if (count > 0) sendInitialArchiveSummary(count);
           break;
         }
-
-        // Se o item já existe mas o contador continua inacessível/zero, damos
-        // alguns ciclos extras antes do fallback que abre a pasta.
-        if (entry && Date.now() > deadline - 12000) break;
-        await wait(500);
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
-
-      // Fallback robusto: abre Arquivadas silenciosamente, conta as conversas
-      // não lidas que o WhatsApp materializa nessa tela e retorna. Isso cobre
-      // versões em que o contador da tela principal só aparece tardiamente ou
-      // não expõe atributos acessíveis.
-      const wasAlreadyOpen = isArchivedFolderOpen();
-      let openedByExtension = false;
-
-      if (!wasAlreadyOpen) {
-        const archivedEntry = findArchivedEntry();
-        if (!archivedEntry) {
-          state.initialArchiveProbeDone = true;
-          return;
-        }
-        archivedEntry.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-        openedByExtension = await waitUntil(isArchivedFolderOpen, 3500, 120);
-        if (!openedByExtension) {
-          state.initialArchiveProbeDone = true;
-          return;
-        }
-      }
-
-      await wait(850);
-      const stats = scanArchivedFolderRows({ allowNotify: true });
-      const count = stats.unreadChats || findArchiveUnreadCount() || state.archiveUnread || 0;
-      if (count > 0) {
-        state.archiveUnread = count;
-        // Se as linhas não puderam ser materializadas, ainda garantimos um toast
-        // genérico para a pendência detectada no carregamento.
-        if (stats.unreadChats === 0) sendInitialArchiveSummary(count);
-      }
-
-      if (openedByExtension) {
-        const back = findBackButton();
-        if (back) {
-          back.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-          await wait(300);
-        }
-      }
-
       state.initialArchiveProbeDone = true;
     } finally {
       state.initialArchiveProbeRunning = false;
     }
   }
 
-  async function silentArchivePoll(force = false) {
-    if (state.archivePollRunning) return;
-    if (!force && !document.hidden) return;
-    if (Date.now() - state.lastArchivePollAt < 3500) return;
-
-    state.archivePollRunning = true;
-    state.lastArchivePollAt = Date.now();
-
-    const wasAlreadyOpen = isArchivedFolderOpen();
-    let openedByExtension = false;
-
-    try {
-      if (!wasAlreadyOpen) {
-        const archivedEntry = findArchivedEntry();
-        if (!archivedEntry) return;
-        archivedEntry.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-        openedByExtension = await waitUntil(isArchivedFolderOpen, 2600, 120);
-        if (!openedByExtension) return;
-      }
-
-      // Aguarda a lista interna terminar de materializar as linhas da pasta.
-      await wait(650);
-      scanArchivedFolderRows({ allowNotify: state.archiveFolderInitialized });
-    } finally {
-      if (openedByExtension) {
-        const back = findBackButton();
-        if (back) {
-          back.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-          await wait(250);
-        }
-      }
-      state.archivePollRunning = false;
-    }
+  function passiveBackgroundScan() {
+    // Chamado pelo service worker como redundância contra throttling de abas
+    // em segundo plano. Apenas relê o DOM; não navega nem simula cliques.
+    scan();
   }
 
   function send(payload) {
@@ -700,6 +588,10 @@
       const prev = state.rows.get(key);
       next.set(key, { unread, preview, title, messageTime });
 
+      if (prev && prev.unread > 0 && unread === 0) {
+        reportConversationState("WHATSAPP_CHAT_READ", title);
+      }
+
       const becameUnread = state.initialized && unread > 0 && (!prev || prev.unread === 0 || unread > prev.unread);
       const unreadGotNewContent = state.initialized && unread > 0 && prev && messageTime && prev.messageTime && messageTime !== prev.messageTime;
       if (becameUnread || unreadGotNewContent) {
@@ -721,7 +613,7 @@
     let archiveTriggered = false;
 
     // Caso principal: o contador ao lado de "Arquivadas" aumentou.
-    if (!document.hidden && state.initialized && archiveUnread !== null && state.archiveUnread !== null && archiveUnread > state.archiveUnread) {
+    if (state.initialized && archiveUnread !== null && state.archiveUnread !== null && archiveUnread > state.archiveUnread) {
       archiveTriggered = true;
       send({
         title: "Conversa arquivada",
@@ -737,7 +629,7 @@
     // Fallback: se o total global de não lidas aumentou, nenhuma conversa
     // normal detectada justificou o aumento e há arquivadas não lidas,
     // tratamos o evento como possível chegada em arquivada.
-    if (!document.hidden && !archiveTriggered && !normalTriggered && state.initialized &&
+    if (!archiveTriggered && !normalTriggered && state.initialized &&
         globalUnread !== null && state.globalUnread !== null &&
         globalUnread > state.globalUnread && (archiveUnread || state.archiveUnread)) {
       send({
@@ -776,7 +668,40 @@
   chrome.runtime.onMessage.addListener((message) => {
     if (!message || typeof message !== "object") return;
     if (message.type === "OPEN_CHAT_BY_TITLE") openChatByTitle(message.title || "");
-    if (message.type === "ARCHIVE_BACKGROUND_POLL") silentArchivePoll(true);
+    if (message.type === "PASSIVE_BACKGROUND_SCAN") passiveBackgroundScan();
+  });
+
+  // Se o usuário abrir uma conversa diretamente no WhatsApp Web, a extensão
+  // encerra os reavisos daquela pendência sem alterar o estado do WhatsApp.
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    const row = getConversationRows().find(item => item === target || item.contains(target));
+    if (!row) return;
+    const title = getRowTitle(row);
+    if (!title || /^(?:arquivadas|archived)$/i.test(normalize(title))) return;
+    setTimeout(() => reportConversationState("WHATSAPP_CHAT_OPENED", title), 120);
+  }, true);
+
+  function startPeriodicMonitoring(seconds) {
+    const safeSeconds = Math.min(300, Math.max(5, Number(seconds) || 8));
+    state.checkIntervalSeconds = safeSeconds;
+    clearInterval(state.periodicScanTimer);
+    state.periodicScanTimer = setInterval(scan, safeSeconds * 1000);
+  }
+
+  async function loadMonitoringInterval() {
+    try {
+      const data = await chrome.storage.sync.get({ checkIntervalSeconds: 8 });
+      startPeriodicMonitoring(data.checkIntervalSeconds);
+    } catch (_) {
+      startPeriodicMonitoring(8);
+    }
+  }
+
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "sync" || !changes.checkIntervalSeconds) return;
+    startPeriodicMonitoring(changes.checkIntervalSeconds.newValue);
   });
 
   const observer = new MutationObserver(scheduleScan);
@@ -790,15 +715,12 @@
 
   setTimeout(scan, 1200);
   setTimeout(runInitialArchiveProbe, 1600);
-  setInterval(scan, 8000);
+  loadMonitoringInterval();
 
-  // Conversas arquivadas podem não atualizar o contador no DOM principal
-  // enquanto a aba está em segundo plano. Quando o WhatsApp estiver oculto,
-  // a extensão abre a pasta Arquivadas de forma silenciosa, lê os não lidos e
-  // retorna à tela anterior. O intervalo local dá resposta rápida; o alarme do
-  // service worker funciona como redundância contra throttling de abas ocultas.
-  setInterval(() => silentArchivePoll(false), 5000);
+  // A varredura periódica usa o intervalo configurado pelo usuário. Alterações
+  // do DOM continuam chegando imediatamente pelo MutationObserver. Em segundo
+  // plano, o alarme do service worker permanece como redundância contra throttling.
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) setTimeout(() => silentArchivePoll(false), 1200);
+    setTimeout(scan, 250);
   });
 })();

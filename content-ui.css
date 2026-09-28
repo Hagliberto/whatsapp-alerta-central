@@ -231,3 +231,66 @@
   }
   #wa-central-alert-host .wa-toast-hint { display: none !important; }
 }
+
+/* Ações de lembrete — v1.3.0 */
+#wa-central-alert-host .wa-toast-footer {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 9px !important;
+  padding: 10px 14px 13px 81px !important;
+}
+
+#wa-central-alert-host .wa-toast-actions {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, auto)) !important;
+  justify-content: end !important;
+  gap: 6px !important;
+}
+
+#wa-central-alert-host .wa-toast-action {
+  appearance: none !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  border-radius: 10px !important;
+  padding: 7px 9px !important;
+  background: rgba(255,255,255,.055) !important;
+  color: #cbd8d3 !important;
+  font: inherit !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  font-weight: 750 !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  transition: .16s ease !important;
+}
+
+#wa-central-alert-host .wa-toast-action:hover {
+  background: rgba(255,255,255,.10) !important;
+  border-color: rgba(255,255,255,.16) !important;
+  transform: translateY(-1px) !important;
+}
+
+#wa-central-alert-host .wa-toast-snooze { color: #f2d492 !important; }
+#wa-central-alert-host .wa-toast-mute { color: #b9c6c1 !important; }
+#wa-central-alert-host .wa-toast-read { color: #a8d7f2 !important; }
+
+#wa-central-alert-host .wa-toast-open {
+  justify-content: center !important;
+  background: linear-gradient(180deg, rgba(37,211,102,.18), rgba(37,211,102,.12)) !important;
+  color: #9ef0bb !important;
+  border-color: rgba(37,211,102,.20) !important;
+}
+
+@media (max-width: 650px) {
+  #wa-central-alert-host .wa-toast-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  #wa-central-alert-host .wa-toast-action {
+    white-space: normal !important;
+  }
+}
+
+@media (max-width: 520px) {
+  #wa-central-alert-host .wa-toast-footer {
+    padding-left: 18px !important;
+  }
+}

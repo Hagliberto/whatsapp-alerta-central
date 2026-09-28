@@ -38,3 +38,9 @@ As permissões declaradas no Manifest são utilizadas para:
 ## Compromissos de manutenção
 
 Futuras versões não devem adicionar coleta ou transmissão externa de conteúdo de mensagens sem alteração explícita da documentação e ciência do usuário.
+
+## Lembretes pendentes — v1.3.x
+
+Para permitir reavisos mesmo quando o service worker do Chrome é suspenso, a extensão mantém localmente apenas metadados mínimos da pendência (identificação da conversa, horário/contagem quando disponíveis, estado de adiamento/silenciamento e uma assinatura numérica de deduplicação).
+
+O texto/prévia da mensagem **não é persistido** no armazenamento da extensão. Em um reaviso posterior, quando o conteúdo original já não estiver em memória, o toast pode exibir uma descrição genérica da pendência.

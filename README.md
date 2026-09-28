@@ -2,7 +2,7 @@
 
 Extensão para **Google Chrome / Chromium (Manifest V3)** que monitora estados não lidos no WhatsApp Web e exibe um toast profissional na aba web ativa do navegador.
 
-> **Versão atual:** `$11.2.15`
+> **Versão atual:** `1.3.1`
 
 ## Visão geral
 
@@ -24,10 +24,14 @@ A extensão considera como evento válido:
 - suporte a conversas normais e arquivadas;
 - detecção por acessibilidade, badges numéricos e indicador visual de não lido;
 - varredura inicial de itens não lidos;
-- leitura silenciosa de Arquivadas quando necessário;
+- monitoramento passivo do contador de Arquivadas, sem abrir ou navegar automaticamente nessa área;
 - prévia opcional da mensagem;
 - som opcional;
 - botão **Abrir conversa**;
+- intervalo de verificação periódica configurável;
+- reaviso automático de mensagens ainda pendentes;
+- ações **Adiar**, **Silenciar** e **Marcar como lida** no toast;
+- encerramento automático do reaviso quando a conversa é aberta no WhatsApp Web;
 - fallback por notificação do sistema em páginas nas quais o Chrome bloqueia injeção;
 - deduplicação de eventos durante a mesma sessão;
 - configurações salvas localmente com `chrome.storage`;

@@ -44,3 +44,14 @@ button { border: 0; border-radius: 11px; padding: 11px 12px; font: inherit; font
 .field-row input { width: 76px; border: 1px solid #ccd8d1; border-radius: 10px; padding: 9px 10px; font: inherit; text-align: center; }
 .saved { position: fixed; right: 24px; bottom: 24px; background: #163d29; color: white; padding: 10px 14px; border-radius: 12px; font-size: 12px; opacity: 0; transform: translateY(10px); pointer-events: none; transition: .2s; }
 .saved.show { opacity: 1; transform: translateY(0); }
+
+/* Monitoramento e lembretes — v1.3.0 */
+.status.compact { margin-top: 8px; margin-bottom: 8px; }
+.field-row input:disabled { background: #f1f4f2; color: #9aa49f; cursor: not-allowed; }
+.field-disabled { opacity: .48; }
+.field-disabled input { pointer-events: none; }
+@media (max-width: 560px) {
+  .settings-shell { padding: 24px 14px 48px; }
+  .field-row { align-items: flex-start; }
+  .field-row > div { flex: 0 0 auto; }
+}

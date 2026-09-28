@@ -12,28 +12,54 @@
       <div class="brand-icon large">💬</div>
       <div>
         <h1>WhatsApp Alerta Central</h1>
-        <p>Configure como os avisos serão exibidos.</p>
+        <p>Configure a detecção, os reavisos e as ações dos alertas.</p>
       </div>
     </header>
 
     <section class="panel">
       <h2>Alertas</h2>
       <label class="switch-row"><span><strong>Ativar extensão</strong><small>Monitora mensagens enquanto o WhatsApp Web estiver aberto.</small></span><input id="enabled" type="checkbox"><i></i></label>
-      <label class="switch-row"><span><strong>Avisar conversas arquivadas</strong><small>Detecta aumento no contador de não lidas da pasta Arquivadas.</small></span><input id="archived" type="checkbox"><i></i></label>
+      <label class="switch-row"><span><strong>Avisar conversas arquivadas</strong><small>Detecta estados não lidos também dentro de Arquivadas.</small></span><input id="archived" type="checkbox"><i></i></label>
       <label class="switch-row"><span><strong>Som</strong><small>Toca um sinal curto junto com o toast.</small></span><input id="sound" type="checkbox"><i></i></label>
       <label class="switch-row"><span><strong>Mostrar prévia</strong><small>Exibe o trecho da mensagem quando estiver disponível.</small></span><input id="showPreview" type="checkbox"><i></i></label>
-      <label class="switch-row"><span><strong>Notificação do sistema como reserva</strong><small>Opcional. Usada somente quando a aba atual não aceita o toast, como páginas chrome://. Pode gerar uma notificação nativa separada.</small></span><input id="desktopFallback" type="checkbox"><i></i></label>
+      <label class="switch-row"><span><strong>Notificação do sistema como reserva</strong><small>Usada quando a aba atual não aceita o toast, como páginas chrome://.</small></span><input id="desktopFallback" type="checkbox"><i></i></label>
 
       <div class="field-row">
-        <span><strong>Duração do toast</strong><small>O alerta permanece visível por 10 segundos.</small></span>
+        <span><strong>Duração do toast</strong><small>Tempo que cada aviso permanece visível.</small></span>
         <div><b>10 s</b></div>
       </div>
+    </section>
+
+    <section class="panel">
+      <h2>Monitoramento e reavisos</h2>
+      <div class="field-row">
+        <span><strong>Verificar novas mensagens a cada</strong><small>Intervalo da varredura periódica. Alterações do WhatsApp também continuam sendo detectadas imediatamente pelo observador da página.</small></span>
+        <div><input id="checkIntervalSeconds" type="number" min="5" max="300" step="1" inputmode="numeric"><b>s</b></div>
+      </div>
+
+      <label class="switch-row"><span><strong>Reavisar mensagens pendentes</strong><small>Se a conversa não for aberta ou confirmada, mostra o alerta novamente.</small></span><input id="repeatReminders" type="checkbox"><i></i></label>
+
+      <div class="field-row reminder-dependent">
+        <span><strong>Reavisar a cada</strong><small>Tempo entre os lembretes enquanto a mensagem continuar pendente.</small></span>
+        <div><input id="repeatReminderMinutes" type="number" min="1" max="1440" step="1" inputmode="numeric"><b>min</b></div>
+      </div>
+
+      <div class="field-row reminder-dependent">
+        <span><strong>Adiar por</strong><small>Tempo aplicado ao botão “Adiar” exibido no alerta.</small></span>
+        <div><input id="snoozeMinutes" type="number" min="1" max="1440" step="1" inputmode="numeric"><b>min</b></div>
+      </div>
+    </section>
+
+    <section class="panel info">
+      <h2>Ações do alerta</h2>
+      <p><strong>Adiar:</strong> agenda o próximo lembrete para depois do período configurado. <strong>Silenciar:</strong> interrompe os reavisos daquela pendência até chegar uma nova mensagem na conversa. <strong>Marcar como lida:</strong> encerra a pendência somente na extensão; não altera o estado da conversa dentro do WhatsApp.</p>
+      <p>Ao clicar em <strong>Abrir</strong>, ou quando a extensão detecta que a conversa foi aberta manualmente no WhatsApp Web, os reavisos daquela pendência são encerrados.</p>
     </section>
 
     <section class="panel info">
       <h2>Como funciona</h2>
       <p>Deixe o <strong>WhatsApp Web aberto em alguma aba</strong>. A extensão observa a lista de conversas localmente e envia o alerta para a aba que estiver ativa.</p>
-      <p>Em conversas arquivadas, o WhatsApp não fornece a notificação comum; por isso a extensão observa o contador de não lidas da pasta <strong>Arquivadas</strong>.</p>
+      <p>Em conversas arquivadas, o WhatsApp pode não fornecer nome ou conteúdo na tela principal; nesses casos o alerta permanece genérico e verdadeiro.</p>
     </section>
 
     <div id="saved" class="saved">Configurações salvas</div>

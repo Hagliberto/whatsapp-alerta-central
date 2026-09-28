@@ -43,6 +43,7 @@
   }
 
   function reasonLabel(payload = {}) {
+    if (payload.notifyReason === "reminder" || payload.isReminder) return "Lembrete de pendência";
     if (payload.notifyReason === "state-became-unread") return "Marcada como não lida";
     if (payload.notifyReason === "startup-unread") return "Pendente ao abrir";
     if (payload.archived) return "Conversa arquivada";
@@ -74,7 +75,6 @@
     } catch (_) {}
   }
 
-  // Chrome only allows Web Audio after a user gesture on the page.
   for (const eventName of ["pointerdown", "keydown", "touchstart"]) {
     window.addEventListener(eventName, unlockAudio, { capture: true, passive: true });
   }
@@ -120,17 +120,32 @@
     setTimeout(() => host.remove(), 240);
   }
 
+  function sendAction(action, payload) {
+    try {
+      if (!globalThis.chrome?.runtime?.id) return;
+      chrome.runtime.sendMessage({
+        type: "ALERT_ACTION",
+        action,
+        alertKey: payload.alertKey || "",
+        signature: payload.alertSignature || payload.signature || "",
+        fingerprint: payload.fingerprint || ""
+      }, () => { void chrome.runtime.lastError; });
+    } catch (_) {}
+  }
+
   function showAlert(payload = {}) {
     removeAlert();
 
     const title = cleanTitle(payload);
     const preview = cleanPreview(payload);
     const time = formatTime(payload.receivedAt);
-    const durationSeconds = 10;
+    const durationSeconds = Number(payload.duration) > 0 ? Number(payload.duration) : 10;
     const reason = reasonLabel(payload);
     const contextLabel = payload.archived ? "Arquivada" : "WhatsApp";
     const unread = Number(payload.unreadCount || 0);
     const unreadLabel = unread > 1 ? `${unread} mensagens não lidas` : (unread === 1 ? "1 mensagem não lida" : "");
+    const snoozeMinutes = Math.max(1, Number(payload.snoozeMinutes || 15));
+    const isReminder = Boolean(payload.isReminder || payload.notifyReason === "reminder");
 
     const host = document.createElement("div");
     host.id = "wa-central-alert-host";
@@ -140,10 +155,10 @@
         <div class="wa-toast-topbar">
           <div class="wa-toast-brand">
             <span class="wa-toast-brand-dot" aria-hidden="true"></span>
-            <span>WhatsApp</span>
+            <span>${isReminder ? "WhatsApp · lembrete" : "WhatsApp"}</span>
           </div>
           <span class="wa-toast-time">${escapeHtml(time)}</span>
-          <button class="wa-toast-close" type="button" title="Fechar" aria-label="Fechar aviso">×</button>
+          <button class="wa-toast-close" type="button" title="Fechar sem confirmar leitura" aria-label="Fechar aviso">×</button>
         </div>
 
         <div class="wa-toast-body">
@@ -165,11 +180,15 @@
         </div>
 
         <div class="wa-toast-footer">
-          <span class="wa-toast-hint">Clique para visualizar no WhatsApp</span>
-          <button class="wa-toast-open" type="button">
-            <span>Abrir conversa</span>
-            <span aria-hidden="true">→</span>
-          </button>
+          <span class="wa-toast-hint">Fechar no × não encerra os lembretes.</span>
+          <div class="wa-toast-actions">
+            <button class="wa-toast-action wa-toast-snooze" type="button" title="Adiar este lembrete">Adiar ${escapeHtml(snoozeMinutes)} min</button>
+            <button class="wa-toast-action wa-toast-mute" type="button" title="Silenciar esta pendência até chegar nova mensagem nesta conversa">Silenciar</button>
+            <button class="wa-toast-action wa-toast-read" type="button" title="Marcar como lida somente na extensão, sem alterar o WhatsApp">Marcar como lida</button>
+            <button class="wa-toast-action wa-toast-open" type="button" title="Abrir a conversa no WhatsApp">
+              <span>Abrir</span><span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
         <div class="wa-toast-progress" style="--wa-toast-duration:${durationSeconds}s"></div>
       </section>`;
@@ -178,13 +197,28 @@
     activeHost = host;
 
     host.querySelector(".wa-toast-close").addEventListener("click", removeAlert);
+    host.querySelector(".wa-toast-snooze").addEventListener("click", () => {
+      sendAction("snooze", payload);
+      removeAlert();
+    });
+    host.querySelector(".wa-toast-mute").addEventListener("click", () => {
+      sendAction("mute", payload);
+      removeAlert();
+    });
+    host.querySelector(".wa-toast-read").addEventListener("click", () => {
+      sendAction("read", payload);
+      removeAlert();
+    });
     host.querySelector(".wa-toast-open").addEventListener("click", () => {
       try {
         if (globalThis.chrome?.runtime?.id) {
-          chrome.runtime.sendMessage(
-            { type: "OPEN_WHATSAPP", title: payload.chatTitle || title || "" },
-            () => { void chrome.runtime.lastError; }
-          );
+          chrome.runtime.sendMessage({
+            type: "OPEN_WHATSAPP",
+            title: payload.chatTitle || title || "",
+            alertKey: payload.alertKey || "",
+            signature: payload.alertSignature || payload.signature || "",
+            fingerprint: payload.fingerprint || ""
+          }, () => { void chrome.runtime.lastError; });
         }
       } catch (_) {}
       removeAlert();
