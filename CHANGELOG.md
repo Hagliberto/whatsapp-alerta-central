@@ -1,3 +1,14 @@
+## 1.4.2 — 2026-09-29
+
+- Adiciona suporte oficial ao **Mozilla Firefox**, preservando a mesma base funcional usada no Chrome/Edge.
+- Adiciona Manifest específico para Firefox com `background.scripts`, ID Gecko estável e declaração de coleta de dados como `none`.
+- Mantém o Manifest atual de Chrome/Edge com `background.service_worker`.
+- Adiciona detecção da família do navegador ao diagnóstico.
+- Ajusta o fallback nativo do Firefox para notificação básica, mantendo as ações completas no toast central e na Central de Pendências.
+- Adiciona geração de dois pacotes de release: **Chrome/Edge** e **Firefox**.
+- Adiciona automação de GitHub Actions para publicar os dois ZIPs quando uma tag `v*` for enviada.
+- Não adiciona servidor, telemetria nem coleta externa de dados.
+
 ## 1.4.1 — 2026-09-28
 
 - Adiciona **Hagliberto Alves de Oliveira** como autor e desenvolvedor oficial da extensão.

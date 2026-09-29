@@ -1,3 +1,5 @@
+const EXT = typeof globalThis.browser?.runtime?.getBrowserInfo === "function" ? globalThis.browser : globalThis.chrome;
+
 let items = [];
 
 const listEl = document.getElementById("pendingList");
@@ -59,19 +61,18 @@ function actionButton(text, className, handler, title = "") {
   return button;
 }
 
-function sendAction(action, item, extra = {}) {
-  return new Promise(resolve => {
-    chrome.runtime.sendMessage({
+async function sendAction(action, item, extra = {}) {
+  try {
+    return await EXT.runtime.sendMessage({
       type: "ALERT_ACTION",
       action,
       alertKey: item.alertKey,
       signature: item.signature,
       ...extra
-    }, response => {
-      void chrome.runtime.lastError;
-      resolve(response || { ok: false });
-    });
-  });
+    }) || { ok: false };
+  } catch (_) {
+    return { ok: false };
+  }
 }
 
 async function runAction(action, item, extra = {}) {
@@ -144,7 +145,7 @@ function render() {
     actions.appendChild(actionButton(item.muted ? "Reativar" : "Silenciar", "secondary", () => runAction(item.muted ? "unmute" : "mute", item)));
     actions.appendChild(actionButton("Marcar como lida", "secondary", () => runAction("read", item), "Encerra somente na extensão"));
     actions.appendChild(actionButton("Abrir conversa", "primary", () => {
-      chrome.runtime.sendMessage({
+      EXT.runtime.sendMessage({
         type: "OPEN_WHATSAPP",
         title,
         alertKey: item.alertKey,
@@ -158,30 +159,26 @@ function render() {
 }
 
 async function refresh() {
-  return new Promise(resolve => {
-    chrome.runtime.sendMessage({ type: "GET_PENDING" }, response => {
-      if (chrome.runtime.lastError || !response?.ok) {
-        items = [];
-        listEl.textContent = "";
-        const error = document.createElement("section");
-        error.className = "panel empty-state";
-        error.innerHTML = "<strong>Não foi possível carregar as pendências.</strong><span>Recarregue a extensão e tente novamente.</span>";
-        listEl.appendChild(error);
-        resolve();
-        return;
-      }
-      items = Array.isArray(response.items) ? response.items : [];
-      render();
-      resolve();
-    });
-  });
+  try {
+    const response = await EXT.runtime.sendMessage({ type: "GET_PENDING" });
+    if (!response?.ok) throw new Error("pending-unavailable");
+    items = Array.isArray(response.items) ? response.items : [];
+    render();
+  } catch (_) {
+    items = [];
+    listEl.textContent = "";
+    const error = document.createElement("section");
+    error.className = "panel empty-state";
+    error.innerHTML = "<strong>Não foi possível carregar as pendências.</strong><span>Reabra esta página ou recarregue a extensão.</span>";
+    listEl.appendChild(error);
+    updateSummary();
+  }
 }
-
 searchEl.addEventListener("input", render);
 filterEl.addEventListener("change", render);
 document.getElementById("refresh").addEventListener("click", refresh);
-document.getElementById("openOptions").addEventListener("click", () => chrome.runtime.openOptionsPage());
-document.getElementById("openWa").addEventListener("click", () => chrome.runtime.sendMessage({ type: "OPEN_WHATSAPP" }));
+document.getElementById("openOptions").addEventListener("click", () => EXT.runtime.openOptionsPage());
+document.getElementById("openWa").addEventListener("click", () => EXT.runtime.sendMessage({ type: "OPEN_WHATSAPP" }));
 
 refresh();
 setInterval(() => {

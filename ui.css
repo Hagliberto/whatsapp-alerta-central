@@ -155,7 +155,7 @@ button { border: 0; border-radius: 11px; padding: 11px 12px; font: inherit; font
   .snooze-group button { flex: 1; }
 }
 
-/* Autoria — v1.4.1 */
+/* Autoria — v1.4.2 */
 .author-mini { margin-top: 15px; padding-top: 13px; border-top: 1px solid #edf1ef; text-align: center; }
 .author-mini strong { display: block; color: #35473e; font-size: 10px; }
 .author-mini span { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; line-height: 1.35; }
@@ -171,3 +171,4 @@ button { border: 0; border-radius: 11px; padding: 11px 12px; font: inherit; font
 @media (max-width: 560px) {
   .about-author { align-items: flex-start; }
 }
+

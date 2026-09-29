@@ -16,8 +16,9 @@
     "https://*/*"
   ],
   "background": {
-    "service_worker": "background.js",
-    "type": "module"
+    "scripts": [
+      "background.js"
+    ]
   },
   "action": {
     "default_title": "WhatsApp Alerta Central",
@@ -55,5 +56,15 @@
     "128": "icons/icon128.png"
   },
   "author": "Hagliberto Alves de Oliveira",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "@whatsapp-alerta-central.hagliberto",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  },
   "homepage_url": "https://github.com/Hagliberto/whatsapp-alerta-central"
 }

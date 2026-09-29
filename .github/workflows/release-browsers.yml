@@ -1,0 +1,75 @@
+name: Build release packages
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate version
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          CHROME_VERSION="$(node -p "require('./manifest.json').version")"
+          FIREFOX_VERSION="$(node -p "require('./manifest.firefox.json').version")"
+          test "$VERSION" = "$CHROME_VERSION"
+          test "$VERSION" = "$FIREFOX_VERSION"
+
+      - name: Validate cross-browser package
+        run: node scripts/validate-cross-browser.mjs
+
+      - name: Build browser packages
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          rm -rf dist
+          mkdir -p dist/chrome-edge dist/firefox
+
+          FILES=(
+            AGENTS.md CHANGELOG.md MANUAL_USUARIO.md PRIVACIDADE.md README.md
+            background.js content-ui.css content-ui.js content-whatsapp.js
+            options.html options.js pending.html pending.js popup.html popup.js ui.css
+          )
+
+          for f in "${FILES[@]}"; do
+            cp "$f" dist/chrome-edge/
+            cp "$f" dist/firefox/
+          done
+
+          cp -R icons dist/chrome-edge/
+          cp -R icons dist/firefox/
+          cp manifest.json dist/chrome-edge/manifest.json
+          cp manifest.firefox.json dist/firefox/manifest.json
+
+          (cd dist/chrome-edge && zip -qr "../whatsapp-alerta-central-chrome-edge-v${VERSION}.zip" .)
+          (cd dist/firefox && zip -qr "../whatsapp-alerta-central-firefox-v${VERSION}.zip" .)
+
+      - name: Publish GitHub Release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
+            gh release create "$GITHUB_REF_NAME" \
+              --title "WhatsApp Alerta Central $GITHUB_REF_NAME" \
+              --notes $'## Escolha seu navegador\n\n- **Chrome / Edge:** baixe `whatsapp-alerta-central-chrome-edge-*.zip`\n- **Firefox:** baixe `whatsapp-alerta-central-firefox-*.zip`\n\nOs dois pacotes pertencem à mesma versão e usam a mesma base funcional.'
+
+          gh release upload "$GITHUB_REF_NAME" \
+            "dist/whatsapp-alerta-central-chrome-edge-v${VERSION}.zip" \
+            "dist/whatsapp-alerta-central-firefox-v${VERSION}.zip" \
+            --clobber

@@ -1,4 +1,5 @@
 (() => {
+  const EXT = typeof globalThis.browser?.runtime?.getBrowserInfo === "function" ? globalThis.browser : globalThis.chrome;
   if (window.__WA_CENTRAL_MONITOR__) return;
   window.__WA_CENTRAL_MONITOR__ = true;
 
@@ -31,10 +32,8 @@
     const safeTitle = normalize(title || "");
     if (!safeTitle || /^(?:arquivadas|archived)$/i.test(safeTitle)) return;
     try {
-      if (!globalThis.chrome?.runtime?.id) return;
-      chrome.runtime.sendMessage({ type, title: safeTitle }, () => {
-        void chrome.runtime.lastError;
-      });
+      if (!EXT?.runtime?.id) return;
+      EXT.runtime.sendMessage({ type, title: safeTitle }).catch(() => {});
     } catch (_) {}
   }
 
@@ -483,12 +482,12 @@
     if (!force && now - state.lastHeartbeatAt < 15000) return;
     state.lastHeartbeatAt = now;
     try {
-      if (!globalThis.chrome?.runtime?.id) return;
-      chrome.runtime.sendMessage({
+      if (!EXT?.runtime?.id) return;
+      EXT.runtime.sendMessage({
         type: "MONITOR_HEARTBEAT",
         monitorStartedAt: state.monitorStartedAt,
         lastScanAt: now
-      }, () => { void chrome.runtime.lastError; });
+      }).catch(() => {});
     } catch (_) {}
   }
 
@@ -522,13 +521,13 @@
     if (!rememberFingerprint(fingerprint)) return;
 
     // Uma extensão Manifest V3 pode ser recarregada enquanto esta aba ainda
-    // mantém o content script antigo em memória. Nesse cenário o Chrome
+    // mantém o content script antigo em memória. Nesse cenário o navegador
     // invalida o contexto e qualquer chamada direta ao runtime pode lançar
     // "Extension context invalidated". A chamada abaixo é deliberadamente
-    // protegida e usa callback para também consumir runtime.lastError.
+    // protegida e trata a rejeição da Promise para evitar erro não tratado.
     try {
-      if (!globalThis.chrome?.runtime?.id) return;
-      chrome.runtime.sendMessage({
+      if (!EXT?.runtime?.id) return;
+      EXT.runtime.sendMessage({
         type: "WHATSAPP_NEW_MESSAGE",
         payload: {
           ...payload,
@@ -538,11 +537,7 @@
           fingerprint,
           receivedAt: Date.now()
         }
-      }, () => {
-        // Ler lastError impede que falhas de contexto/conexão apareçam como
-        // erros não tratados no painel de extensões.
-        void chrome.runtime.lastError;
-      });
+      }).catch(() => {});
     } catch (_) {
       // A aba será reconectada à extensão assim que for recarregada.
     }
@@ -683,7 +678,7 @@
     }
   }
 
-  chrome.runtime.onMessage.addListener((message) => {
+  EXT.runtime.onMessage.addListener((message) => {
     if (!message || typeof message !== "object") return;
     if (message.type === "OPEN_CHAT_BY_TITLE") openChatByTitle(message.title || "");
     if (message.type === "PASSIVE_BACKGROUND_SCAN") passiveBackgroundScan();
@@ -710,14 +705,14 @@
 
   async function loadMonitoringInterval() {
     try {
-      const data = await chrome.storage.sync.get({ checkIntervalSeconds: 8 });
+      const data = await EXT.storage.sync.get({ checkIntervalSeconds: 8 });
       startPeriodicMonitoring(data.checkIntervalSeconds);
     } catch (_) {
       startPeriodicMonitoring(8);
     }
   }
 
-  chrome.storage.onChanged.addListener((changes, areaName) => {
+  EXT.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== "sync" || !changes.checkIntervalSeconds) return;
     startPeriodicMonitoring(changes.checkIntervalSeconds.newValue);
   });

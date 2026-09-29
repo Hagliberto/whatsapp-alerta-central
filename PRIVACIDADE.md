@@ -43,7 +43,7 @@ Futuras versões não devem adicionar coleta ou transmissão externa de conteúd
 
 ## Lembretes pendentes — v1.3.x e v1.4.x
 
-Para permitir reavisos mesmo quando o service worker do Chrome é suspenso, a extensão mantém localmente apenas metadados mínimos da pendência (identificação da conversa, horário/contagem quando disponíveis, estado de adiamento/silenciamento e uma assinatura numérica de deduplicação).
+Para permitir reavisos mesmo quando o processo de segundo plano do navegador é suspenso, a extensão mantém localmente apenas metadados mínimos da pendência (identificação da conversa, horário/contagem quando disponíveis, estado de adiamento/silenciamento e uma assinatura numérica de deduplicação).
 
 O texto/prévia da mensagem **não é persistido** no armazenamento da extensão. Em um reaviso posterior, quando o conteúdo original já não estiver em memória, o toast pode exibir uma descrição genérica da pendência.
 
@@ -55,3 +55,7 @@ A Central de pendências, o badge, o horário de silêncio, as regras por conver
 As regras podem armazenar o nome da conversa informado pelo próprio usuário e preferências como intervalo de reaviso ou autorização durante o silêncio. O diagnóstico mantém apenas horários e estados técnicos, como última varredura e último evento detectado.
 
 O texto/prévia das mensagens continua sem ser persistido para a Central de pendências ou para o diagnóstico.
+
+## Firefox / AMO
+
+No Manifest do Firefox, a extensão declara `data_collection_permissions.required = ["none"]`, pois não coleta nem transmite dados pessoais ou conteúdo de mensagens para fora do navegador.

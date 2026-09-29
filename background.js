@@ -1,3 +1,5 @@
+const IS_FIREFOX = typeof globalThis.browser?.runtime?.getBrowserInfo === "function";
+const EXT = IS_FIREFOX ? globalThis.browser : globalThis.chrome;
 const DEFAULTS = {
   enabled: true,
   archived: true,
@@ -88,7 +90,7 @@ function normalizeRules(value) {
 }
 
 async function getSettings() {
-  const data = await chrome.storage.sync.get(DEFAULTS);
+  const data = await EXT.storage.sync.get(DEFAULTS);
   return {
     ...DEFAULTS,
     ...data,
@@ -157,14 +159,14 @@ function shouldSuppressForQuiet(settings, data = {}) {
 
 async function updateDiagnostics(patch = {}) {
   try {
-    const stored = await chrome.storage.local.get(DIAG_KEY);
+    const stored = await EXT.storage.local.get(DIAG_KEY);
     const current = stored[DIAG_KEY] && typeof stored[DIAG_KEY] === "object" ? stored[DIAG_KEY] : {};
-    await chrome.storage.local.set({ [DIAG_KEY]: { ...current, ...patch } });
+    await EXT.storage.local.set({ [DIAG_KEY]: { ...current, ...patch } });
   } catch (_) {}
 }
 
 async function getDiagnostics() {
-  const stored = await chrome.storage.local.get(DIAG_KEY);
+  const stored = await EXT.storage.local.get(DIAG_KEY);
   return stored[DIAG_KEY] && typeof stored[DIAG_KEY] === "object" ? stored[DIAG_KEY] : {};
 }
 
@@ -172,40 +174,40 @@ async function updateBadge(map = null) {
   try {
     const pending = map || await getPendingMap();
     const count = Object.keys(pending).length;
-    await chrome.action.setBadgeText({ text: count ? (count > 99 ? "99+" : String(count)) : "" });
-    await chrome.action.setBadgeBackgroundColor({ color: "#25D366" });
-    await chrome.action.setBadgeTextColor?.({ color: "#062713" });
+    await EXT.action.setBadgeText({ text: count ? (count > 99 ? "99+" : String(count)) : "" });
+    await EXT.action.setBadgeBackgroundColor({ color: "#25D366" });
+    await EXT.action.setBadgeTextColor?.({ color: "#062713" });
   } catch (_) {}
 }
 
 async function ensureAlarms(settings = null) {
   const current = settings || await getSettings();
-  try { await chrome.alarms.create(REMINDER_ALARM, { periodInMinutes: 0.5 }); } catch (_) {}
+  try { await EXT.alarms.create(REMINDER_ALARM, { periodInMinutes: 0.5 }); } catch (_) {}
   try {
     const archivePeriod = Math.max(0.5, current.checkIntervalSeconds / 60);
-    await chrome.alarms.create(ARCHIVE_ALARM, { periodInMinutes: archivePeriod });
+    await EXT.alarms.create(ARCHIVE_ALARM, { periodInMinutes: archivePeriod });
   } catch (_) {}
 }
 
-chrome.runtime.onInstalled.addListener(async () => {
-  try { await chrome.alarms.clear(LEGACY_ARCHIVE_ALARM); } catch (_) {}
-  const current = await chrome.storage.sync.get(DEFAULTS);
+EXT.runtime.onInstalled.addListener(async () => {
+  try { await EXT.alarms.clear(LEGACY_ARCHIVE_ALARM); } catch (_) {}
+  const current = await EXT.storage.sync.get(DEFAULTS);
   const merged = { ...DEFAULTS, ...current, conversationRules: normalizeRules(current.conversationRules) };
-  await chrome.storage.sync.set(merged);
-  try { await chrome.storage.local.remove("waRecentMessageFingerprints"); } catch (_) {}
+  await EXT.storage.sync.set(merged);
+  try { await EXT.storage.local.remove("waRecentMessageFingerprints"); } catch (_) {}
   await ensureAlarms(merged);
   await updateBadge();
-  await updateDiagnostics({ extensionStartedAt: Date.now(), extensionVersion: chrome.runtime.getManifest().version });
+  await updateDiagnostics({ extensionStartedAt: Date.now(), extensionVersion: EXT.runtime.getManifest().version });
 });
 
-chrome.runtime.onStartup.addListener(() => {
-  chrome.alarms.clear(LEGACY_ARCHIVE_ALARM).catch(() => {});
+EXT.runtime.onStartup.addListener(() => {
+  EXT.alarms.clear(LEGACY_ARCHIVE_ALARM).catch(() => {});
   ensureAlarms().catch(() => {});
   updateBadge().catch(() => {});
-  updateDiagnostics({ extensionStartedAt: Date.now(), extensionVersion: chrome.runtime.getManifest().version }).catch(() => {});
+  updateDiagnostics({ extensionStartedAt: Date.now(), extensionVersion: EXT.runtime.getManifest().version }).catch(() => {});
 });
 
-chrome.storage.onChanged.addListener((changes, areaName) => {
+EXT.storage.onChanged.addListener((changes, areaName) => {
   if (areaName !== "sync") return;
   if (changes.checkIntervalSeconds) ensureAlarms().catch(() => {});
   if (changes.repeatReminders || changes.repeatReminderMinutes || changes.quietHoursEnabled || changes.quietStart || changes.quietEnd || changes.conversationRules) {
@@ -235,7 +237,7 @@ function buildStableSignature(data = {}) {
 }
 
 async function getPendingMap() {
-  const stored = await chrome.storage.local.get(PENDING_KEY);
+  const stored = await EXT.storage.local.get(PENDING_KEY);
   const value = stored[PENDING_KEY];
   return value && typeof value === "object" && !Array.isArray(value) ? value : {};
 }
@@ -245,13 +247,13 @@ async function setPendingMap(map) {
     .filter(([, item]) => item && typeof item === "object")
     .sort((a, b) => Number(a[1].firstSeenAt || 0) - Number(b[1].firstSeenAt || 0));
   const trimmedMap = Object.fromEntries(entries.slice(-MAX_PENDING));
-  await chrome.storage.local.set({ [PENDING_KEY]: trimmedMap });
+  await EXT.storage.local.set({ [PENDING_KEY]: trimmedMap });
   await updateBadge(trimmedMap);
 }
 
 async function getAckMap() {
   const now = Date.now();
-  const stored = await chrome.storage.local.get(ACK_KEY);
+  const stored = await EXT.storage.local.get(ACK_KEY);
   const raw = stored[ACK_KEY];
   const map = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
   let changed = false;
@@ -261,7 +263,7 @@ async function getAckMap() {
       changed = true;
     }
   }
-  if (changed) await chrome.storage.local.set({ [ACK_KEY]: map });
+  if (changed) await EXT.storage.local.set({ [ACK_KEY]: map });
   return map;
 }
 
@@ -271,30 +273,30 @@ async function setAck(map, key, signature) {
   const trimmed = Object.entries(map)
     .sort((a, b) => Number(a[1]?.at || 0) - Number(b[1]?.at || 0))
     .slice(-MAX_ACKS);
-  await chrome.storage.local.set({ [ACK_KEY]: Object.fromEntries(trimmed) });
+  await EXT.storage.local.set({ [ACK_KEY]: Object.fromEntries(trimmed) });
 }
 
 async function findWhatsAppTab() {
-  const tabs = await chrome.tabs.query({ url: "https://web.whatsapp.com/*" });
+  const tabs = await EXT.tabs.query({ url: "https://web.whatsapp.com/*" });
   return tabs[0] || null;
 }
 
 async function focusWhatsApp(chatTitle) {
   const tab = await findWhatsAppTab();
   if (!tab) {
-    await chrome.tabs.create({ url: "https://web.whatsapp.com/" });
+    await EXT.tabs.create({ url: "https://web.whatsapp.com/" });
     return;
   }
-  await chrome.tabs.update(tab.id, { active: true });
-  if (tab.windowId) await chrome.windows.update(tab.windowId, { focused: true });
+  await EXT.tabs.update(tab.id, { active: true });
+  if (tab.windowId) await EXT.windows.update(tab.windowId, { focused: true });
   if (chatTitle) {
-    try { await chrome.tabs.sendMessage(tab.id, { type: "OPEN_CHAT_BY_TITLE", title: chatTitle }); } catch (_) {}
+    try { await EXT.tabs.sendMessage(tab.id, { type: "OPEN_CHAT_BY_TITLE", title: chatTitle }); } catch (_) {}
   }
 }
 
 async function rememberDesktopNotification(notificationId, payload) {
   try {
-    const stored = await chrome.storage.local.get(NOTIFICATION_MAP_KEY);
+    const stored = await EXT.storage.local.get(NOTIFICATION_MAP_KEY);
     const map = stored[NOTIFICATION_MAP_KEY] && typeof stored[NOTIFICATION_MAP_KEY] === "object" ? stored[NOTIFICATION_MAP_KEY] : {};
     map[notificationId] = {
       alertKey: payload.alertKey || "",
@@ -305,17 +307,17 @@ async function rememberDesktopNotification(notificationId, payload) {
     for (const [id, item] of Object.entries(map)) {
       if (!item || Date.now() - Number(item.createdAt || 0) > 24 * 60 * 60 * 1000) delete map[id];
     }
-    await chrome.storage.local.set({ [NOTIFICATION_MAP_KEY]: map });
+    await EXT.storage.local.set({ [NOTIFICATION_MAP_KEY]: map });
   } catch (_) {}
 }
 
 async function getDesktopNotificationTarget(notificationId, remove = false) {
-  const stored = await chrome.storage.local.get(NOTIFICATION_MAP_KEY);
+  const stored = await EXT.storage.local.get(NOTIFICATION_MAP_KEY);
   const map = stored[NOTIFICATION_MAP_KEY] && typeof stored[NOTIFICATION_MAP_KEY] === "object" ? stored[NOTIFICATION_MAP_KEY] : {};
   const target = map[notificationId] || null;
   if (remove && target) {
     delete map[notificationId];
-    await chrome.storage.local.set({ [NOTIFICATION_MAP_KEY]: map });
+    await EXT.storage.local.set({ [NOTIFICATION_MAP_KEY]: map });
   }
   return target;
 }
@@ -327,18 +329,21 @@ async function showDesktopFallback(data, settings) {
     : (settings.showPreview && data.preview ? data.preview : "Você recebeu uma nova mensagem.");
   try {
     const notificationId = `wa-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    await chrome.notifications.create(notificationId, {
+    const notificationOptions = {
       type: "basic",
       iconUrl: "icons/icon128.png",
       title: data.isReminder ? `Lembrete — ${data.title || "WhatsApp"}` : (data.title || "Nova mensagem no WhatsApp"),
-      message,
-      priority: 2,
-      requireInteraction: false,
-      buttons: [
+      message
+    };
+    if (!IS_FIREFOX) {
+      notificationOptions.priority = 2;
+      notificationOptions.requireInteraction = false;
+      notificationOptions.buttons = [
         { title: `Adiar ${settings.snoozeMinutes} min` },
         { title: "Marcar como lida" }
-      ]
-    });
+      ];
+    }
+    await EXT.notifications.create(notificationId, notificationOptions);
     await rememberDesktopNotification(notificationId, data);
     return true;
   } catch (_) {
@@ -351,9 +356,9 @@ function canInjectIntoUrl(url = "") {
 }
 
 async function ensureUiInTab(tabId) {
-  try { await chrome.scripting.insertCSS({ target: { tabId }, files: ["content-ui.css"] }); } catch (_) {}
+  try { await EXT.scripting.insertCSS({ target: { tabId }, files: ["content-ui.css"] }); } catch (_) {}
   try {
-    await chrome.scripting.executeScript({ target: { tabId }, files: ["content-ui.js"] });
+    await EXT.scripting.executeScript({ target: { tabId }, files: ["content-ui.js"] });
     return true;
   } catch (_) {
     return false;
@@ -362,13 +367,13 @@ async function ensureUiInTab(tabId) {
 
 async function sendToastToTab(tabId, payload) {
   try {
-    await chrome.tabs.sendMessage(tabId, { type: "SHOW_WHATSAPP_TOAST", payload });
+    await EXT.tabs.sendMessage(tabId, { type: "SHOW_WHATSAPP_TOAST", payload });
     return true;
   } catch (_) {}
   const injected = await ensureUiInTab(tabId);
   if (!injected) return false;
   try {
-    await chrome.tabs.sendMessage(tabId, { type: "SHOW_WHATSAPP_TOAST", payload });
+    await EXT.tabs.sendMessage(tabId, { type: "SHOW_WHATSAPP_TOAST", payload });
     return true;
   } catch (_) {
     return false;
@@ -383,7 +388,7 @@ async function dispatchCentralPopup(data, settings = null) {
   const quietInfo = shouldSuppressForQuiet(current, data);
   if (quietInfo.suppress) return false;
 
-  const [active] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  const [active] = await EXT.tabs.query({ active: true, lastFocusedWindow: true });
   let delivered = false;
   let method = "none";
   const payload = {
@@ -545,7 +550,7 @@ async function acknowledgeByTitle(title) {
     const trimmed = Object.entries(acks)
       .sort((a, b) => Number(a[1]?.at || 0) - Number(b[1]?.at || 0))
       .slice(-MAX_ACKS);
-    await chrome.storage.local.set({ [ACK_KEY]: Object.fromEntries(trimmed) });
+    await EXT.storage.local.set({ [ACK_KEY]: Object.fromEntries(trimmed) });
   }
   return count;
 }
@@ -628,7 +633,7 @@ function pendingForUi(map) {
     }));
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+EXT.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message || typeof message !== "object") return false;
 
   if (message.type === "WHATSAPP_NEW_MESSAGE") {
@@ -661,7 +666,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "OPEN_PENDING_CENTER") {
-    chrome.tabs.create({ url: chrome.runtime.getURL("pending.html") }).then(() => sendResponse({ ok: true })).catch(() => sendResponse({ ok: false }));
+    EXT.tabs.create({ url: EXT.runtime.getURL("pending.html") }).then(() => sendResponse({ ok: true })).catch(() => sendResponse({ ok: false }));
     return true;
   }
 
@@ -699,7 +704,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         .sort((a, b) => a - b)[0] || null;
       sendResponse({
         ok: true,
-        version: chrome.runtime.getManifest().version,
+        version: EXT.runtime.getManifest().version,
+        browserFamily: IS_FIREFOX ? "Firefox" : "Chrome / Edge",
         connected: Boolean(tab),
         pendingCount: values.length,
         mutedCount: values.filter(item => item?.muted).length,
@@ -725,7 +731,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-chrome.notifications.onClicked.addListener((notificationId) => {
+EXT.notifications.onClicked.addListener((notificationId) => {
   serial(async () => {
     const target = await getDesktopNotificationTarget(notificationId, true);
     if (target) await handleAlertAction("open", target);
@@ -733,21 +739,23 @@ chrome.notifications.onClicked.addListener((notificationId) => {
   }).catch(() => {});
 });
 
-chrome.notifications.onButtonClicked.addListener((notificationId, buttonIndex) => {
-  serial(async () => {
-    const target = await getDesktopNotificationTarget(notificationId, true);
-    if (!target) return;
-    if (buttonIndex === 0) await handleAlertAction("snooze", target);
-    if (buttonIndex === 1) await handleAlertAction("read", target);
-    try { await chrome.notifications.clear(notificationId); } catch (_) {}
-  }).catch(() => {});
-});
+if (EXT.notifications.onButtonClicked?.addListener) {
+  EXT.notifications.onButtonClicked.addListener((notificationId, buttonIndex) => {
+    serial(async () => {
+      const target = await getDesktopNotificationTarget(notificationId, true);
+      if (!target) return;
+      if (buttonIndex === 0) await handleAlertAction("snooze", target);
+      if (buttonIndex === 1) await handleAlertAction("read", target);
+      try { await EXT.notifications.clear(notificationId); } catch (_) {}
+    }).catch(() => {});
+  });
+}
 
-chrome.notifications.onClosed.addListener((notificationId) => {
+EXT.notifications.onClosed.addListener((notificationId) => {
   getDesktopNotificationTarget(notificationId, true).catch(() => {});
 });
 
-chrome.alarms.onAlarm.addListener((alarm) => {
+EXT.alarms.onAlarm.addListener((alarm) => {
   if (alarm?.name === REMINDER_ALARM) {
     serial(processDueReminders).catch(() => {});
     return;
@@ -759,10 +767,10 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     const tab = await findWhatsAppTab();
     if (!tab?.id) return;
     await updateDiagnostics({ lastPassiveScanRequestAt: Date.now() });
-    try { await chrome.tabs.sendMessage(tab.id, { type: "PASSIVE_BACKGROUND_SCAN" }); } catch (_) {}
+    try { await EXT.tabs.sendMessage(tab.id, { type: "PASSIVE_BACKGROUND_SCAN" }); } catch (_) {}
   })();
 });
 
 ensureAlarms().catch(() => {});
 updateBadge().catch(() => {});
-updateDiagnostics({ extensionStartedAt: Date.now(), extensionVersion: chrome.runtime.getManifest().version }).catch(() => {});
+updateDiagnostics({ extensionStartedAt: Date.now(), extensionVersion: EXT.runtime.getManifest().version }).catch(() => {});

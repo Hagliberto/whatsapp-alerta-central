@@ -12,7 +12,7 @@ O objetivo é preservar a estabilidade, a segurança, a privacidade e a experiê
 
 ## 2. Visão geral do projeto
 
-O **WhatsApp Alerta Central** é uma extensão Chrome baseada em **Manifest V3** que monitora o WhatsApp Web aberto no navegador e exibe um alerta visual central quando uma nova mensagem é detectada.
+O **WhatsApp Alerta Central** é uma extensão WebExtension para Chrome/Edge e Firefox baseada em **Manifest V3** que monitora o WhatsApp Web aberto no navegador e exibe um alerta visual central quando uma nova mensagem é detectada.
 
 Principais objetivos:
 
@@ -158,7 +158,7 @@ Quando o WhatsApp não expuser nome ou conteúdo da mensagem arquivada, mostrar 
 - envio de dados a APIs externas;
 - scripts remotos carregados por CDN.
 
-Preferências devem ficar em `chrome.storage`.
+Preferências devem ficar na API WebExtensions de armazenamento (`chrome.storage`/compatível).
 
 Conteúdo de mensagens deve existir somente em memória durante o processamento necessário para exibir o alerta.
 
@@ -354,7 +354,7 @@ Não tentar acessar IndexedDB, Local Storage ou estruturas privadas do WhatsApp 
 
 ## 11. Padrão de código
 
-- JavaScript moderno compatível com Chrome atual.
+- JavaScript moderno compatível com Chrome/Edge e Firefox atuais.
 - funções pequenas e específicas;
 - nomes descritivos;
 - constantes para valores reutilizados;

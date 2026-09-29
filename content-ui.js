@@ -1,4 +1,5 @@
 (() => {
+  const EXT = typeof globalThis.browser?.runtime?.getBrowserInfo === "function" ? globalThis.browser : globalThis.chrome;
   if (window.__WA_CENTRAL_UI__) return;
   window.__WA_CENTRAL_UI__ = true;
 
@@ -126,15 +127,15 @@
 
   function sendAction(action, payload, extra = {}) {
     try {
-      if (!globalThis.chrome?.runtime?.id) return;
-      chrome.runtime.sendMessage({
+      if (!EXT?.runtime?.id) return;
+      EXT.runtime.sendMessage({
         type: "ALERT_ACTION",
         action,
         alertKey: payload.alertKey || "",
         signature: payload.alertSignature || payload.signature || "",
         fingerprint: payload.fingerprint || "",
         ...extra
-      }, () => { void chrome.runtime.lastError; });
+      }).catch(() => {});
     } catch (_) {}
   }
 
@@ -235,13 +236,13 @@
     host.querySelector(".wa-toast-open").addEventListener("click", () => {
       try {
         if (globalThis.chrome?.runtime?.id) {
-          chrome.runtime.sendMessage({
+          EXT.runtime.sendMessage({
             type: "OPEN_WHATSAPP",
             title: payload.chatTitle || title || "",
             alertKey: payload.alertKey || "",
             signature: payload.alertSignature || payload.signature || "",
             fingerprint: payload.fingerprint || ""
-          }, () => { void chrome.runtime.lastError; });
+          }).catch(() => {});
         }
       } catch (_) {}
       removeAlert();
@@ -251,7 +252,7 @@
     closeTimer = setTimeout(removeAlert, durationSeconds * 1000);
   }
 
-  chrome.runtime.onMessage.addListener((message) => {
+  EXT.runtime.onMessage.addListener((message) => {
     if (!message || typeof message !== "object") return;
     if (message.type === "SHOW_WHATSAPP_TOAST" || message.type === "SHOW_WHATSAPP_POPUP") {
       showAlert(message.payload || {});

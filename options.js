@@ -1,3 +1,5 @@
+const EXT = typeof globalThis.browser?.runtime?.getBrowserInfo === "function" ? globalThis.browser : globalThis.chrome;
+
 const DEFAULTS = {
   enabled: true,
   archived: true,
@@ -77,7 +79,7 @@ function refreshDependentStates() {
 }
 
 async function load() {
-  const data = await chrome.storage.sync.get(DEFAULTS);
+  const data = await EXT.storage.sync.get(DEFAULTS);
   for (const id of EDITABLE_IDS) {
     const el = document.getElementById(id);
     if (!el) continue;
@@ -111,7 +113,7 @@ async function saveGeneral() {
   document.getElementById("checkIntervalSeconds").value = data.checkIntervalSeconds;
   document.getElementById("repeatReminderMinutes").value = data.repeatReminderMinutes;
   document.getElementById("snoozeMinutes").value = data.snoozeMinutes;
-  await chrome.storage.sync.set(data);
+  await EXT.storage.sync.set(data);
   refreshDependentStates();
   showSaved();
 }
@@ -200,7 +202,7 @@ function editRule(id) {
 
 async function deleteRule(id) {
   conversationRules = conversationRules.filter(rule => rule.id !== id);
-  await chrome.storage.sync.set({ conversationRules });
+  await EXT.storage.sync.set({ conversationRules });
   if (editingRuleId === id) resetRuleEditor();
   renderRules();
   showSaved("Regra excluída");
@@ -240,7 +242,7 @@ async function saveRule() {
     conversationRules.push(rule);
   }
   conversationRules = normalizeRules(conversationRules);
-  await chrome.storage.sync.set({ conversationRules });
+  await EXT.storage.sync.set({ conversationRules });
   renderRules();
   resetRuleEditor();
   showSaved(wasEditing ? "Regra atualizada" : "Regra adicionada");
@@ -264,30 +266,26 @@ function setDiag(id, text, tone = "") {
 }
 
 async function refreshDiagnostics() {
-  return new Promise(resolve => {
-    chrome.runtime.sendMessage({ type: "GET_DIAGNOSTICS" }, response => {
-      if (chrome.runtime.lastError || !response?.ok) {
-        setDiag("diagConnection", "Indisponível", "warn");
-        setDiag("diagMonitor", "Indisponível", "warn");
-        resolve();
-        return;
-      }
-      const heartbeatAge = response.lastMonitorHeartbeatAt ? Date.now() - Number(response.lastMonitorHeartbeatAt) : Infinity;
-      const monitorOk = response.connected && heartbeatAge < Math.max(45000, Number(response.checkIntervalSeconds || 8) * 3000);
-      setDiag("diagVersion", `v${response.version || "—"}`);
-      setDiag("diagConnection", response.connected ? "Detectado" : "Não aberto", response.connected ? "good" : "warn");
-      setDiag("diagMonitor", monitorOk ? "Ativo" : (response.connected ? "Sem resposta recente" : "Aguardando WhatsApp"), monitorOk ? "good" : "warn");
-      setDiag("diagLastScan", formatDateTime(response.lastScanAt, "Ainda não registrada"));
-      setDiag("diagLastMessage", formatDateTime(response.lastIncomingAt, "Nenhuma nesta sessão"));
-      setDiag("diagNextReminder", formatDateTime(response.nextReminderAt, "Nenhum agendado"));
-      setDiag("diagPending", `${Number(response.pendingCount || 0)} pendente(s) · ${Number(response.mutedCount || 0)} silenciada(s)`);
-      const quietText = !response.quietHoursEnabled ? "Desativado" : (response.quietNow ? `Ativo até ${formatDateTime(response.quietEndAt, "—")}` : "Fora do horário");
-      setDiag("diagQuiet", quietText, response.quietNow ? "warn" : "");
-      resolve();
-    });
-  });
+  try {
+    const response = await EXT.runtime.sendMessage({ type: "GET_DIAGNOSTICS" });
+    if (!response?.ok) throw new Error("diagnostics-unavailable");
+    const heartbeatAge = response.lastMonitorHeartbeatAt ? Date.now() - Number(response.lastMonitorHeartbeatAt) : Infinity;
+    const monitorOk = response.connected && heartbeatAge < Math.max(45000, Number(response.checkIntervalSeconds || 8) * 3000);
+    setDiag("diagVersion", `v${response.version || "—"}`);
+    setDiag("diagBrowser", response.browserFamily || "—");
+    setDiag("diagConnection", response.connected ? "Detectado" : "Não aberto", response.connected ? "good" : "warn");
+    setDiag("diagMonitor", monitorOk ? "Ativo" : (response.connected ? "Sem resposta recente" : "Aguardando WhatsApp"), monitorOk ? "good" : "warn");
+    setDiag("diagLastScan", formatDateTime(response.lastScanAt, "Ainda não registrada"));
+    setDiag("diagLastMessage", formatDateTime(response.lastIncomingAt, "Nenhuma nesta sessão"));
+    setDiag("diagNextReminder", formatDateTime(response.nextReminderAt, "Nenhum agendado"));
+    setDiag("diagPending", `${Number(response.pendingCount || 0)} pendente(s) · ${Number(response.mutedCount || 0)} silenciada(s)`);
+    const quietText = !response.quietHoursEnabled ? "Desativado" : (response.quietNow ? `Ativo até ${formatDateTime(response.quietEndAt, "—")}` : "Fora do horário");
+    setDiag("diagQuiet", quietText, response.quietNow ? "warn" : "");
+  } catch (_) {
+    setDiag("diagConnection", "Indisponível", "warn");
+    setDiag("diagMonitor", "Indisponível", "warn");
+  }
 }
-
 for (const id of EDITABLE_IDS) {
   document.getElementById(id)?.addEventListener("change", saveGeneral);
 }
@@ -297,7 +295,7 @@ document.getElementById("ruleRepeatMode")?.addEventListener("change", refreshRul
 document.getElementById("saveRule")?.addEventListener("click", saveRule);
 document.getElementById("cancelRule")?.addEventListener("click", resetRuleEditor);
 document.getElementById("refreshDiagnostics")?.addEventListener("click", refreshDiagnostics);
-document.getElementById("openPending")?.addEventListener("click", () => chrome.runtime.sendMessage({ type: "OPEN_PENDING_CENTER" }));
+document.getElementById("openPending")?.addEventListener("click", () => EXT.runtime.sendMessage({ type: "OPEN_PENDING_CENTER" }));
 
 load().catch(() => showSaved("Não foi possível carregar as configurações"));
 setInterval(refreshDiagnostics, 5000);

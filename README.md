@@ -1,8 +1,8 @@
 # WhatsApp Alerta Central
 
-Extensão para **Google Chrome / Chromium (Manifest V3)** que monitora estados não lidos no WhatsApp Web e exibe um toast profissional na aba web ativa do navegador.
+Extensão WebExtension para **Google Chrome, Microsoft Edge e Mozilla Firefox (Manifest V3)** que monitora estados não lidos no WhatsApp Web e exibe um toast profissional na aba web ativa do navegador.
 
-> **Versão atual:** `1.4.1`
+> **Versão atual:** `1.4.2`
 
 ## Visão geral
 
@@ -47,14 +47,37 @@ A extensão considera como evento válido:
 - configurações salvas localmente com `chrome.storage`;
 - sem envio de conteúdo para servidores próprios.
 
+## Downloads por navegador
+
+Cada GitHub Release publica dois pacotes independentes:
+
+- **Chrome / Edge:** `whatsapp-alerta-central-chrome-edge-v1.4.2.zip`
+- **Firefox:** `whatsapp-alerta-central-firefox-v1.4.2.zip`
+
+O código funcional é compartilhado. A diferença principal fica no Manifest: Chrome/Edge usam `background.service_worker`; Firefox usa `background.scripts` e um identificador Gecko próprio.
+
 ## Instalação para teste
 
-1. Baixe ou clone este repositório.
-2. Abra `chrome://extensions`.
-3. Ative **Modo do desenvolvedor**.
-4. Clique em **Carregar sem compactação**.
-5. Selecione a pasta raiz do projeto.
+### Chrome / Edge
+
+1. Baixe o pacote **Chrome / Edge**.
+2. Extraia o ZIP.
+3. Abra `chrome://extensions` no Chrome ou `edge://extensions` no Edge.
+4. Ative **Modo do desenvolvedor**.
+5. Clique em **Carregar sem compactação**.
+6. Selecione a pasta extraída.
+7. Abra ou recarregue `https://web.whatsapp.com/`.
+
+### Firefox
+
+1. Baixe o pacote **Firefox**.
+2. Extraia o ZIP.
+3. Abra `about:debugging#/runtime/this-firefox`.
+4. Clique em **Carregar extensão temporária**.
+5. Selecione o `manifest.json` da pasta extraída.
 6. Abra ou recarregue `https://web.whatsapp.com/`.
+
+Para instalação permanente no Firefox, o pacote precisa ser assinado pela Mozilla/AMO.
 
 Consulte o [Manual do Usuário](MANUAL_USUARIO.md) para detalhes.
 
@@ -73,19 +96,23 @@ Consulte o [Manual do Usuário](MANUAL_USUARIO.md) para detalhes.
 │   └── TESTING.md
 ├── icons/
 ├── scripts/
-│   └── validate.mjs
+│   ├── validate.mjs
+│   ├── validate-cross-browser.mjs
+│   └── build-release.ps1
 ├── AGENTS.md
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── MANUAL_USUARIO.md
 ├── PRIVACIDADE.md
 ├── README.md
+├── RELEASE_NAVEGADORES.md
 ├── SECURITY.md
 ├── background.js
 ├── content-ui.css
 ├── content-ui.js
 ├── content-whatsapp.js
-├── manifest.json
+├── manifest.json                 # Chrome / Edge
+├── manifest.firefox.json         # Firefox
 ├── options.html
 ├── options.js
 ├── pending.html
@@ -108,6 +135,12 @@ A extensão é dividida em três responsabilidades principais:
 
 Mais detalhes em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+### Compatibilidade entre navegadores
+
+- **Chrome / Edge:** mantém o comportamento atual, incluindo os botões de ação no fallback de notificação do sistema quando suportados.
+- **Firefox:** mantém Central de Pendências, reavisos, soneca, silêncio, regras por conversa, badge e diagnóstico. No fallback nativo do sistema, o Firefox recebe uma notificação básica; as ações continuam disponíveis no toast central e na Central de Pendências.
+- O Firefox usa `browser_specific_settings.gecko.data_collection_permissions.required = ["none"]`, declarando que a extensão não coleta nem transmite dados para fora do navegador.
+
 ## Privacidade
 
 O projeto processa os dados localmente no navegador. Nenhuma mensagem é enviada a um servidor próprio do projeto.
@@ -119,7 +152,7 @@ Leia [PRIVACIDADE.md](PRIVACIDADE.md).
 Requisitos mínimos:
 
 - Node.js 20+ para os scripts de validação;
-- Chrome/Chromium compatível com Manifest V3.
+- Chrome/Edge compatível com Manifest V3 ou Firefox compatível com WebExtensions Manifest V3.
 
 Validação local:
 
@@ -135,7 +168,7 @@ Antes de alterar o código, consulte [AGENTS.md](AGENTS.md) e [CONTRIBUTING.md](
 
 O WhatsApp Web é uma aplicação de terceiros e pode alterar classes, atributos, estrutura DOM ou comportamento sem aviso. O projeto evita depender exclusivamente de classes CSS geradas e prioriza sinais semânticos e de acessibilidade, mas mudanças relevantes no WhatsApp podem exigir atualização do detector.
 
-Páginas protegidas do Chrome, como `chrome://extensions`, `chrome://settings` e a Chrome Web Store, não permitem injeção de content scripts. Nesses casos, a extensão utiliza o fallback disponível.
+Páginas internas protegidas do navegador, como `chrome://`, `edge://`, `about:` e as lojas de extensões, não permitem injeção comum de content scripts. Nesses casos, a extensão utiliza o fallback disponível.
 
 ## Segurança
 

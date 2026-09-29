@@ -1,9 +1,9 @@
 # Manual do Usuário — WhatsApp Alerta Central
 
-**Versão:** 1.4.1
-**Plataforma:** Google Chrome / navegadores Chromium compatíveis
+**Versão:** 1.4.2  
+**Plataformas:** Google Chrome / Microsoft Edge / Mozilla Firefox  
 **Tipo:** Extensão local para WhatsApp Web
-**Autor:** Hagliberto Alves de Oliveira
+**Autor:** Hagliberto Alves de Oliveira  
 
 ---
 
@@ -33,17 +33,21 @@ Toda a operação da extensão é realizada localmente no navegador.
 - Intervalo de verificação periódica configurável.
 - Reaviso de mensagens pendentes em intervalo configurável.
 - Ações para adiar, silenciar ou confirmar a leitura na extensão.
-- Notificação do sistema como alternativa em páginas onde o Chrome não permite sobreposição.
-- Preferências armazenadas localmente pelo Chrome.
+- Notificação do sistema como alternativa em páginas onde o navegador não permite sobreposição.
+- Preferências armazenadas localmente pelo navegador.
 - Nenhum servidor externo da extensão.
 
 ---
+
+## 2.1. Compatibilidade das ações no Firefox
+
+No Firefox, o fallback nativo do sistema é exibido como notificação básica. As ações **Adiar**, **Silenciar** e **Marcar como lida** continuam disponíveis no toast central e na **Central de Pendências**. Clicar na notificação nativa abre/foca o WhatsApp.
 
 ## 3. Requisitos
 
 Para utilizar a extensão é necessário:
 
-- Google Chrome atualizado ou navegador Chromium compatível;
+- Google Chrome, Microsoft Edge ou Mozilla Firefox atualizado;
 - acesso ao WhatsApp Web;
 - sessão do WhatsApp Web conectada;
 - manter uma aba do WhatsApp Web aberta para a detecção baseada na página.
@@ -63,15 +67,11 @@ Endereço utilizado pelo WhatsApp Web:
 3. Escolha **Extrair tudo**.
 4. Mantenha a pasta extraída em um local fixo do computador.
 
-> Não apague nem mova a pasta depois de carregar a extensão no Chrome. O Chrome utiliza os arquivos diretamente dessa pasta quando a instalação é feita pelo modo do desenvolvedor.
+> Não apague nem mova a pasta depois de carregar a extensão em modo de desenvolvimento. Chrome e Edge utilizam diretamente essa pasta; no Firefox, a instalação por `about:debugging` é temporária.
 
-### 4.2. Abrir a área de extensões
+### 4.2. Abrir a área de extensões — Chrome / Edge
 
-No Chrome, digite na barra de endereços:
-
-`chrome://extensions`
-
-Pressione **Enter**.
+No Chrome, abra `chrome://extensions`. No Edge, abra `edge://extensions`.
 
 ### 4.3. Ativar modo do desenvolvedor
 
@@ -85,11 +85,32 @@ No canto superior direito da página de extensões, ative:
 2. Selecione a pasta extraída da extensão.
 3. Confirme.
 
-O Chrome deverá mostrar a extensão com o nome:
+O Chrome ou Edge deverá mostrar a extensão com o nome:
 
 **WhatsApp Alerta Central**
 
 ---
+
+
+### 4.5. Instalação temporária no Firefox
+
+1. Baixe o pacote **Firefox** da GitHub Release.
+2. Extraia o ZIP em uma pasta.
+3. No Firefox, abra `about:debugging#/runtime/this-firefox`.
+4. Clique em **Carregar extensão temporária**.
+5. Selecione o arquivo `manifest.json` da pasta extraída.
+6. Abra ou recarregue `https://web.whatsapp.com/`.
+
+> A instalação feita por `about:debugging` é temporária e é removida ao encerrar o Firefox. Para uso permanente, o pacote precisa ser assinado pela Mozilla/AMO.
+
+### 4.6. Qual pacote baixar no GitHub
+
+Na página da Release, escolha somente um dos pacotes:
+
+- `whatsapp-alerta-central-chrome-edge-v1.4.2.zip` para Chrome e Edge;
+- `whatsapp-alerta-central-firefox-v1.4.2.zip` para Firefox.
+
+Os dois pacotes têm os mesmos recursos principais. A diferença está na integração com o navegador.
 
 ## 5. Primeiro uso
 
@@ -136,7 +157,7 @@ A extensão poderá mostrar o nome e outros dados disponíveis.
 
 O aviso poderá ser apresentado como:
 
-**Conversa arquivada**
+**Conversa arquivada**  
 **Chegou uma nova mensagem em uma conversa arquivada.**
 
 Isso é intencional. A extensão não inventa informações e não força a abertura da conversa para obter dados privados.
@@ -145,7 +166,7 @@ Isso é intencional. A extensão não inventa informações e não força a aber
 
 ## 8. Configurações
 
-Clique no ícone da extensão na barra do Chrome para acessar os controles.
+Clique no ícone da extensão na barra do navegador para acessar os controles.
 
 A página de configurações permite ajustar os recursos disponíveis.
 
@@ -257,7 +278,7 @@ O diagnóstico não registra conteúdo de mensagens.
 
 ### `storage`
 
-Usada para salvar as configurações da extensão no Chrome.
+Usada para salvar as configurações da extensão no navegador.
 
 ### `tabs`
 
