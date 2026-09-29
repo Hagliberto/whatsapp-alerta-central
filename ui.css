@@ -171,4 +171,3 @@ button { border: 0; border-radius: 11px; padding: 11px 12px; font: inherit; font
 @media (max-width: 560px) {
   .about-author { align-items: flex-start; }
 }
-

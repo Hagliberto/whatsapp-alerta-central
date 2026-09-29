@@ -1,9 +1,9 @@
 # Manual do Usuário — WhatsApp Alerta Central
 
-**Versão:** 1.4.1  
-**Plataforma:** Google Chrome / navegadores Chromium compatíveis  
+**Versão:** 1.4.1
+**Plataforma:** Google Chrome / navegadores Chromium compatíveis
 **Tipo:** Extensão local para WhatsApp Web
-**Autor:** Hagliberto Alves de Oliveira  
+**Autor:** Hagliberto Alves de Oliveira
 
 ---
 
@@ -136,7 +136,7 @@ A extensão poderá mostrar o nome e outros dados disponíveis.
 
 O aviso poderá ser apresentado como:
 
-**Conversa arquivada**  
+**Conversa arquivada**
 **Chegou uma nova mensagem em uma conversa arquivada.**
 
 Isso é intencional. A extensão não inventa informações e não força a abertura da conversa para obter dados privados.
