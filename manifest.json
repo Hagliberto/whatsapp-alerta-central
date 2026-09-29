@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "WhatsApp Alerta Central",
-  "version": "1.3.1",
-  "description": "Alertas locais do WhatsApp Web com verificação configurável, reavisos de pendências e ações de adiar, silenciar e confirmar leitura na extensão.",
+  "version": "1.4.1",
+  "description": "Alertas locais do WhatsApp Web com central de pendências, horário de silêncio, regras por conversa, badge, soneca rápida e diagnóstico.",
   "permissions": [
     "storage",
     "tabs",

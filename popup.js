@@ -5,12 +5,20 @@ const archivedEl = document.getElementById("archived");
 const repeatEl = document.getElementById("repeatReminders");
 const statusEl = document.getElementById("status");
 const pendingEl = document.getElementById("pending");
+const quietEl = document.getElementById("quiet");
 const openWaEl = document.getElementById("openWa");
 const optionsEl = document.getElementById("options");
+const pendingCenterEl = document.getElementById("pendingCenter");
+
+function formatTime(value) {
+  if (!value) return "";
+  try {
+    return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
+  } catch (_) { return ""; }
+}
 
 async function load() {
   const settings = await chrome.storage.sync.get(DEFAULTS);
-
   if (enabledEl) enabledEl.checked = Boolean(settings.enabled);
   if (archivedEl) archivedEl.checked = Boolean(settings.archived);
   if (repeatEl) repeatEl.checked = Boolean(settings.repeatReminders);
@@ -41,17 +49,25 @@ async function load() {
         : `${pending} pendência${pending === 1 ? "" : "s"}${muted ? ` · ${muted} silenciada${muted === 1 ? "" : "s"}` : ""}`;
       pendingEl.classList.toggle("ok", pending === 0);
     }
+
+    if (quietEl) {
+      const active = Boolean(response?.quietNow);
+      quietEl.classList.toggle("hidden", !active);
+      quietEl.classList.toggle("warn", active);
+      if (active) {
+        const end = formatTime(response?.quietEndAt);
+        quietEl.textContent = end ? `◷ Horário de silêncio ativo até ${end}` : "◷ Horário de silêncio ativo";
+      }
+    }
   });
 }
 
 if (enabledEl) enabledEl.addEventListener("change", () => chrome.storage.sync.set({ enabled: enabledEl.checked }));
 if (archivedEl) archivedEl.addEventListener("change", () => chrome.storage.sync.set({ archived: archivedEl.checked }));
 if (repeatEl) repeatEl.addEventListener("change", () => chrome.storage.sync.set({ repeatReminders: repeatEl.checked }));
-
-if (openWaEl) {
-  openWaEl.addEventListener("click", () => chrome.runtime.sendMessage({ type: "OPEN_WHATSAPP" }));
-}
+if (openWaEl) openWaEl.addEventListener("click", () => chrome.runtime.sendMessage({ type: "OPEN_WHATSAPP" }));
 if (optionsEl) optionsEl.addEventListener("click", () => chrome.runtime.openOptionsPage());
+if (pendingCenterEl) pendingCenterEl.addEventListener("click", () => chrome.runtime.sendMessage({ type: "OPEN_PENDING_CENTER" }));
 
 load().catch(() => {
   if (statusEl) {

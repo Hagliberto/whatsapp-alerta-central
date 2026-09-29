@@ -1,14 +1,17 @@
 # Manual do Usuário — WhatsApp Alerta Central
 
-**Versão:** 1.3.1  
+**Versão:** 1.4.1  
 **Plataforma:** Google Chrome / navegadores Chromium compatíveis  
 **Tipo:** Extensão local para WhatsApp Web
+**Autor:** Hagliberto Alves de Oliveira  
 
 ---
 
 ## 1. Apresentação
 
 O **WhatsApp Alerta Central** foi criado para destacar a chegada de novas mensagens do WhatsApp Web enquanto você trabalha em outras páginas do navegador.
+
+A extensão é de autoria e desenvolvimento de **Hagliberto Alves de Oliveira**, com foco em alertas locais, organização de mensagens pendentes, privacidade e praticidade no uso diário.
 
 Em vez de depender apenas da pequena notificação padrão do navegador, a extensão exibe um aviso central e visível na aba que estiver em uso.
 
@@ -179,7 +182,7 @@ O alerta permanece visível por 10 segundos antes de desaparecer automaticamente
 
 No toast:
 
-- **Adiar:** posterga o próximo lembrete;
+- **Adiar:** abre atalhos de 5, 15, 30 ou 60 minutos no toast;
 - **Silenciar:** não repete a pendência atual até uma nova mensagem chegar nessa conversa;
 - **Marcar como lida:** encerra a pendência somente na extensão; não clica, não lê nem altera a conversa no WhatsApp;
 - **Abrir:** abre/foca a conversa e encerra os reavisos da pendência.
@@ -198,6 +201,57 @@ Exemplo de páginas restritas:
 - algumas páginas internas protegidas do navegador.
 
 ---
+
+### 8.8. Central de pendências
+
+A **Central de pendências** reúne todas as conversas que ainda aguardam uma ação na extensão. Ela pode ser aberta pelo popup ou pela página de configurações.
+
+Na central é possível:
+
+- pesquisar pelo nome da conversa;
+- filtrar pendências ativas, silenciadas ou adiadas;
+- adiar por 5, 15, 30 ou 60 minutos;
+- silenciar ou reativar uma pendência;
+- marcar como lida somente na extensão;
+- abrir a conversa no WhatsApp Web.
+
+A Central de pendências não guarda o texto da mensagem. Ela mostra apenas os metadados necessários ao controle dos lembretes.
+
+### 8.9. Horário de silêncio
+
+Ative **Horário de silêncio** para definir um intervalo no qual os alertas não devem interromper o usuário. Exemplo: `22:00` até `07:00`.
+
+Quando uma mensagem chega durante o silêncio, ela continua registrada como pendente e será apresentada depois do horário, salvo quando existir uma regra individual autorizando aquela conversa a alertar durante o silêncio.
+
+### 8.10. Regras por contato ou grupo
+
+As regras usam o **nome exato da conversa** exibido no WhatsApp Web. Para cada conversa é possível:
+
+- usar o intervalo padrão de reaviso;
+- definir um intervalo próprio;
+- desativar reavisos daquela conversa;
+- permitir alertas durante o horário de silêncio.
+
+A extensão não acessa a agenda interna nem o banco do WhatsApp para criar essas regras.
+
+### 8.11. Badge no ícone
+
+O ícone da extensão mostra a quantidade de pendências atuais. Quando não há pendências, o badge fica vazio.
+
+### 8.12. Diagnóstico
+
+A área **Diagnóstico** da página de configurações informa:
+
+- versão da extensão;
+- se o WhatsApp Web foi detectado;
+- se o monitor enviou heartbeat recente;
+- horário da última varredura;
+- horário da última mensagem detectada;
+- próximo reaviso programado;
+- quantidade de pendências e silenciadas;
+- situação atual do horário de silêncio.
+
+O diagnóstico não registra conteúdo de mensagens.
 
 ## 9. Permissões utilizadas
 

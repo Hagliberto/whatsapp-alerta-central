@@ -18,6 +18,7 @@
 
     <div id="status" class="status">Verificando WhatsApp Web…</div>
     <div id="pending" class="status compact">Verificando pendências…</div>
+    <div id="quiet" class="status compact hidden">Horário de silêncio ativo</div>
 
     <label class="switch-row">
       <span><strong>Ativar alertas</strong><small>Exibir toast</small></span>
@@ -34,9 +35,15 @@
       <input id="repeatReminders" type="checkbox"><i></i>
     </label>
 
-    <div class="actions">
-      <button id="openWa" class="primary">Abrir WhatsApp Web</button>
+    <div class="actions popup-actions">
+      <button id="pendingCenter" class="primary full-span">Central de pendências</button>
+      <button id="openWa" class="secondary">WhatsApp Web</button>
       <button id="options" class="secondary">Configurações</button>
+    </div>
+
+    <div class="author-mini" aria-label="Autor da extensão">
+      <strong>Hagliberto Alves de Oliveira</strong>
+      <span>Autor e desenvolvedor do WhatsApp Alerta Central</span>
     </div>
   </main>
   <script src="popup.js"></script>

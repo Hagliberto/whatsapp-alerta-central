@@ -79,6 +79,10 @@
     window.addEventListener(eventName, unlockAudio, { capture: true, passive: true });
   }
 
+  window.addEventListener("keydown", event => {
+    if (event.key === "Escape") removeAlert();
+  }, true);
+
   function playSound() {
     if (!audioCtx || !audioReady || audioCtx.state !== "running") {
       pendingSound = true;
@@ -120,7 +124,7 @@
     setTimeout(() => host.remove(), 240);
   }
 
-  function sendAction(action, payload) {
+  function sendAction(action, payload, extra = {}) {
     try {
       if (!globalThis.chrome?.runtime?.id) return;
       chrome.runtime.sendMessage({
@@ -128,7 +132,8 @@
         action,
         alertKey: payload.alertKey || "",
         signature: payload.alertSignature || payload.signature || "",
-        fingerprint: payload.fingerprint || ""
+        fingerprint: payload.fingerprint || "",
+        ...extra
       }, () => { void chrome.runtime.lastError; });
     } catch (_) {}
   }
@@ -145,6 +150,9 @@
     const unread = Number(payload.unreadCount || 0);
     const unreadLabel = unread > 1 ? `${unread} mensagens não lidas` : (unread === 1 ? "1 mensagem não lida" : "");
     const snoozeMinutes = Math.max(1, Number(payload.snoozeMinutes || 15));
+    const quickSnooze = Array.isArray(payload.quickSnoozeMinutes) && payload.quickSnoozeMinutes.length
+      ? payload.quickSnoozeMinutes.slice(0, 4).map(value => Math.max(1, Number(value) || 1))
+      : [5, 15, 30, 60];
     const isReminder = Boolean(payload.isReminder || payload.notifyReason === "reminder");
 
     const host = document.createElement("div");
@@ -182,7 +190,13 @@
         <div class="wa-toast-footer">
           <span class="wa-toast-hint">Fechar no × não encerra os lembretes.</span>
           <div class="wa-toast-actions">
-            <button class="wa-toast-action wa-toast-snooze" type="button" title="Adiar este lembrete">Adiar ${escapeHtml(snoozeMinutes)} min</button>
+            <div class="wa-toast-snooze-wrap">
+              <button class="wa-toast-action wa-toast-snooze" type="button" title="Escolher por quanto tempo adiar" aria-expanded="false">Adiar ▾</button>
+              <div class="wa-toast-snooze-menu" role="menu" aria-label="Tempo para adiar">
+                ${quickSnooze.map(minutes => `<button type="button" class="wa-toast-snooze-option" data-minutes="${minutes}" role="menuitem">${minutes < 60 ? `${minutes} min` : `${minutes / 60} h`}</button>`).join("")}
+                ${quickSnooze.includes(snoozeMinutes) ? "" : `<button type="button" class="wa-toast-snooze-option" data-minutes="${snoozeMinutes}" role="menuitem">Padrão · ${snoozeMinutes} min</button>`}
+              </div>
+            </div>
             <button class="wa-toast-action wa-toast-mute" type="button" title="Silenciar esta pendência até chegar nova mensagem nesta conversa">Silenciar</button>
             <button class="wa-toast-action wa-toast-read" type="button" title="Marcar como lida somente na extensão, sem alterar o WhatsApp">Marcar como lida</button>
             <button class="wa-toast-action wa-toast-open" type="button" title="Abrir a conversa no WhatsApp">
@@ -197,10 +211,19 @@
     activeHost = host;
 
     host.querySelector(".wa-toast-close").addEventListener("click", removeAlert);
-    host.querySelector(".wa-toast-snooze").addEventListener("click", () => {
-      sendAction("snooze", payload);
-      removeAlert();
+    const snoozeButton = host.querySelector(".wa-toast-snooze");
+    const snoozeMenu = host.querySelector(".wa-toast-snooze-menu");
+    snoozeButton.addEventListener("click", () => {
+      const open = snoozeMenu.classList.toggle("open");
+      snoozeButton.setAttribute("aria-expanded", String(open));
     });
+    for (const option of host.querySelectorAll(".wa-toast-snooze-option")) {
+      option.addEventListener("click", () => {
+        const minutes = Math.max(1, Number(option.dataset.minutes || snoozeMinutes));
+        sendAction("snooze", payload, { minutes });
+        removeAlert();
+      });
+    }
     host.querySelector(".wa-toast-mute").addEventListener("click", () => {
       sendAction("mute", payload);
       removeAlert();

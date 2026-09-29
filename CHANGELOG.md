@@ -1,3 +1,21 @@
+## 1.4.1 — 2026-09-28
+
+- Adiciona **Hagliberto Alves de Oliveira** como autor e desenvolvedor oficial da extensão.
+- Inclui identificação de autoria no popup, na Central de pendências e em uma seção dedicada nas Configurações.
+- Adiciona uma breve descrição do autor e do propósito da extensão no README e no Manual do Usuário.
+- Não altera permissões, monitoramento, privacidade ou comportamento funcional da extensão.
+
+## 1.4.0 — 2026-09-28
+
+- Adiciona **Central de pendências** dedicada, com pesquisa, filtros e ações por conversa.
+- Adiciona **horário de silêncio** configurável; alertas recebidos durante o período permanecem pendentes e são apresentados após o término.
+- Adiciona **regras por contato/grupo** pelo nome exato da conversa, permitindo intervalo próprio, ausência de reaviso e exceção ao horário de silêncio.
+- Adiciona **badge no ícone da extensão** com a quantidade atual de pendências.
+- Adiciona **soneca rápida** de 5, 15, 30 e 60 minutos diretamente no toast e na Central de pendências.
+- Adiciona **tela de diagnóstico** com versão, conexão do WhatsApp Web, heartbeat do monitor, última varredura, última mensagem detectada, próximo reaviso e estado do silêncio.
+- Mantém o conteúdo/prévia das mensagens fora do armazenamento persistente; a central trabalha somente com metadados mínimos da pendência.
+- Não adiciona novas permissões ao Manifest.
+
 ## 1.3.1 — 2026-09-28
 
 - Corrige o monitoramento de conversas arquivadas para obedecer ao modo estritamente passivo definido pelo projeto.

@@ -2,11 +2,15 @@
 
 Extensão para **Google Chrome / Chromium (Manifest V3)** que monitora estados não lidos no WhatsApp Web e exibe um toast profissional na aba web ativa do navegador.
 
-> **Versão atual:** `1.3.1`
+> **Versão atual:** `1.4.1`
 
 ## Visão geral
 
 O projeto foi criado para destacar mensagens e conversas não lidas sem depender da aba do WhatsApp estar em primeiro plano. O processamento ocorre localmente no navegador e não utiliza backend próprio, banco remoto ou analytics externo.
+
+### Autor
+
+**Hagliberto Alves de Oliveira** — autor e desenvolvedor do **WhatsApp Alerta Central**, criado para oferecer alertas locais, organização de mensagens pendentes e maior controle das notificações do WhatsApp Web, com foco em privacidade e praticidade.
 
 ### O que gera alerta
 
@@ -31,6 +35,12 @@ A extensão considera como evento válido:
 - intervalo de verificação periódica configurável;
 - reaviso automático de mensagens ainda pendentes;
 - ações **Adiar**, **Silenciar** e **Marcar como lida** no toast;
+- soneca rápida de **5, 15, 30 ou 60 minutos**;
+- **Central de pendências** com pesquisa, filtros e ações por conversa;
+- **horário de silêncio** configurável, inclusive atravessando a meia-noite;
+- **regras por contato/grupo** usando o nome exato da conversa, com intervalo próprio, opção de não reavisar e exceção ao silêncio;
+- **badge no ícone da extensão** com a quantidade de pendências;
+- **diagnóstico local** com estado do monitor, última varredura, última detecção e próximo reaviso;
 - encerramento automático do reaviso quando a conversa é aberta no WhatsApp Web;
 - fallback por notificação do sistema em páginas nas quais o Chrome bloqueia injeção;
 - deduplicação de eventos durante a mesma sessão;
@@ -78,6 +88,8 @@ Consulte o [Manual do Usuário](MANUAL_USUARIO.md) para detalhes.
 ├── manifest.json
 ├── options.html
 ├── options.js
+├── pending.html
+├── pending.js
 ├── popup.html
 ├── popup.js
 ├── ui.css
@@ -89,8 +101,10 @@ Consulte o [Manual do Usuário](MANUAL_USUARIO.md) para detalhes.
 A extensão é dividida em três responsabilidades principais:
 
 - `content-whatsapp.js`: detecta estados não lidos no WhatsApp Web;
-- `background.js`: coordena eventos, aba ativa, injeção e fallback de notificação;
-- `content-ui.js` + `content-ui.css`: renderizam o toast na aba web ativa.
+- `background.js`: coordena eventos, pendências, regras, horário de silêncio, badge, aba ativa, injeção e fallback de notificação;
+- `content-ui.js` + `content-ui.css`: renderizam o toast na aba web ativa;
+- `pending.html` + `pending.js`: exibem a Central de pendências;
+- `options.html` + `options.js`: concentram preferências, regras por conversa e diagnóstico.
 
 Mais detalhes em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 

@@ -19,6 +19,8 @@
     initialNormalScanDone: false,
     periodicScanTimer: null,
     checkIntervalSeconds: 8,
+    monitorStartedAt: Date.now(),
+    lastHeartbeatAt: 0,
     sessionToken: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
   };
 
@@ -476,10 +478,25 @@
     }
   }
 
+  function sendHeartbeat(force = false) {
+    const now = Date.now();
+    if (!force && now - state.lastHeartbeatAt < 15000) return;
+    state.lastHeartbeatAt = now;
+    try {
+      if (!globalThis.chrome?.runtime?.id) return;
+      chrome.runtime.sendMessage({
+        type: "MONITOR_HEARTBEAT",
+        monitorStartedAt: state.monitorStartedAt,
+        lastScanAt: now
+      }, () => { void chrome.runtime.lastError; });
+    } catch (_) {}
+  }
+
   function passiveBackgroundScan() {
     // Chamado pelo service worker como redundância contra throttling de abas
     // em segundo plano. Apenas relê o DOM; não navega nem simula cliques.
     scan();
+    sendHeartbeat(true);
   }
 
   function send(payload) {
@@ -562,6 +579,7 @@
   }
 
   function scan() {
+    sendHeartbeat();
     const rows = getConversationRows();
 
     // Quando a pasta Arquivadas está aberta, as linhas visíveis pertencem a ela.
@@ -713,6 +731,7 @@
     attributeFilter: ["aria-label", "title", "data-testid"]
   });
 
+  sendHeartbeat(true);
   setTimeout(scan, 1200);
   setTimeout(runInitialArchiveProbe, 1600);
   loadMonitoringInterval();

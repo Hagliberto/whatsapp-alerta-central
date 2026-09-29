@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Central de pendências — WhatsApp Alerta Central</title>
+  <link rel="stylesheet" href="ui.css">
+</head>
+<body>
+  <main class="settings-shell wide-settings pending-shell">
+    <header class="settings-header">
+      <div class="brand-icon large">💬</div>
+      <div>
+        <h1>Central de pendências</h1>
+        <p>Veja e controle os lembretes que ainda aguardam sua ação.</p>
+      </div>
+      <div class="header-actions">
+        <button id="openWa" class="primary" type="button">Abrir WhatsApp</button>
+        <button id="openOptions" class="secondary" type="button">Configurações</button>
+      </div>
+    </header>
+
+    <section class="panel pending-summary-panel">
+      <div class="summary-grid">
+        <div class="summary-item"><span>Total</span><strong id="sumTotal">0</strong></div>
+        <div class="summary-item"><span>Ativas</span><strong id="sumActive">0</strong></div>
+        <div class="summary-item"><span>Silenciadas</span><strong id="sumMuted">0</strong></div>
+        <div class="summary-item"><span>Próximo reaviso</span><strong id="sumNext">—</strong></div>
+      </div>
+    </section>
+
+    <section class="panel pending-controls">
+      <div class="pending-filter-row">
+        <label class="input-block grow"><span>Pesquisar conversa</span><input id="search" type="search" placeholder="Digite parte do nome"></label>
+        <label class="input-block"><span>Mostrar</span>
+          <select id="filter">
+            <option value="all">Todas</option>
+            <option value="active">Ativas</option>
+            <option value="muted">Silenciadas</option>
+            <option value="snoozed">Adiadas</option>
+          </select>
+        </label>
+        <button id="refresh" class="secondary align-end" type="button">Atualizar</button>
+      </div>
+    </section>
+
+    <div id="pendingList" class="pending-list" aria-live="polite"></div>
+
+    <footer class="author-footer">
+      <strong>Hagliberto Alves de Oliveira</strong>
+      <span>Autor e desenvolvedor do WhatsApp Alerta Central</span>
+    </footer>
+  </main>
+  <script src="pending.js"></script>
+</body>
+</html>
